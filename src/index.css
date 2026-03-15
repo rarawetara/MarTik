@@ -1,0 +1,902 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  font-family: system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  color: #1a1a1a;
+  background: #faf9f7;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+  padding-bottom: 72px;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+input,
+textarea {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+  padding: 16px;
+  max-width: 640px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.card h2,
+.card h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: #fff;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 100;
+}
+
+.bottom-nav a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 12px;
+  text-decoration: none;
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.bottom-nav a.active {
+  color: #2d5a4a;
+  font-weight: 500;
+}
+
+.water-glass {
+  width: 48px;
+  height: 80px;
+  border: 2px solid #7eb8a8;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  background: #f0f7f5;
+}
+
+.water-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(180deg, #7eb8a8 0%, #5a9a8a 100%);
+  transition: height 0.3s ease;
+}
+
+.mood-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mood-options button {
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  background: #fff;
+}
+
+.mood-options button.selected {
+  background: #e8f2ef;
+  border-color: #7eb8a8;
+  color: #2d5a4a;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.task-item.done {
+  opacity: 0.7;
+}
+
+.task-item input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+}
+
+.task-item span {
+  flex: 1;
+}
+
+.btn-primary {
+  background: #2d5a4a;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid #ddd;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.875rem;
+  color: #555;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 24px 16px;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.date-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.date-nav h1 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.date-nav button {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.diary-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.diary-list li {
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.diary-list a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.diary-list time {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+/* Beauty (Phase 2A) */
+.beauty-header {
+  margin-bottom: 20px;
+}
+
+.beauty-header__title {
+  margin: 0 0 8px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.beauty-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.beauty-tabs__tab {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: #666;
+}
+
+.beauty-tabs__tab--active {
+  background: #e8f2ef;
+  border-color: #7eb8a8;
+  color: #2d5a4a;
+  font-weight: 500;
+}
+
+.beauty-header__subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.beauty-filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.beauty-filters__select {
+  flex: 1;
+  min-width: 120px;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background: #fff;
+}
+
+.beauty-actions {
+  margin-bottom: 20px;
+}
+
+.beauty-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.beauty-product-card {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease;
+}
+
+.beauty-product-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.beauty-product-card__image-wrap {
+  aspect-ratio: 1;
+  background: #f0f7f5;
+  position: relative;
+  overflow: hidden;
+}
+
+.beauty-product-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.beauty-product-card__placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #e8f2ef 0%, #d4e8e2 100%);
+}
+
+.beauty-product-card__body {
+  padding: 12px;
+  flex: 1;
+}
+
+.beauty-product-card__name {
+  margin: 0 0 4px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  line-height: 1.3;
+}
+
+.beauty-product-card__meta {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.beauty-product-card__actions {
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px 12px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.beauty-product-card__btn {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+}
+
+.beauty-product-card__btn--edit {
+  color: #2d5a4a;
+  border-color: #7eb8a8;
+  background: #f0f7f5;
+}
+
+.beauty-product-card__btn--delete {
+  color: #888;
+}
+
+.beauty-product-form-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.beauty-product-form {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 400px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.beauty-product-form__title {
+  margin: 0 0 20px;
+  font-size: 1.25rem;
+}
+
+.beauty-product-form__photo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.beauty-product-form__preview {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid #eee;
+}
+
+.beauty-product-form__photo-placeholder {
+  width: 100px;
+  height: 100px;
+  background: #f0f7f5;
+  border-radius: 12px;
+  border: 1px dashed #7eb8a8;
+}
+
+.beauty-product-form__file-input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.beauty-product-form__photo-btn {
+  margin-top: 4px;
+}
+
+.beauty-product-form__error {
+  color: #c00;
+  font-size: 0.875rem;
+  margin: 0 0 12px;
+}
+
+.beauty-product-form__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+/* Beauty routines (Phase 2B) */
+.beauty-routines-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.beauty-routine-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid #eee;
+}
+
+.beauty-routine-card__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.beauty-routine-card__name {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.beauty-routine-card__type {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: #f0f7f5;
+  color: #2d5a4a;
+}
+
+.beauty-routine-card__steps {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+}
+
+.beauty-routine-card__step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.beauty-routine-card__step--empty {
+  color: #888;
+}
+
+.beauty-routine-card__step-num {
+  min-width: 1.5em;
+  color: #666;
+}
+
+.beauty-routine-card__actions {
+  display: flex;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.beauty-routine-card__btn {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+}
+
+.beauty-routine-card__btn--edit {
+  color: #2d5a4a;
+  border-color: #7eb8a8;
+  background: #f0f7f5;
+}
+
+.beauty-routine-form__steps {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 10px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.beauty-routine-form__step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  background: #fafafa;
+}
+
+.beauty-routine-form__step-num {
+  min-width: 1.5em;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.beauty-routine-form__step-name {
+  flex: 1;
+  font-size: 0.9rem;
+}
+
+.beauty-routine-form__step-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.beauty-routine-form__step-btn {
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.beauty-routine-form__step-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.beauty-routine-form__step-btn--remove {
+  color: #888;
+}
+
+.beauty-routine-form__add-step {
+  margin-top: 6px;
+}
+
+.beauty-routine-form__hint {
+  font-size: 0.85rem;
+}
+
+/* Phase 2F: routine scheduling */
+.beauty-schedule-weekdays {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.beauty-schedule-weekday {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.beauty-schedule-weekday input {
+  width: 18px;
+  height: 18px;
+}
+
+.beauty-schedule-active-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #888;
+  margin: 6px 0 0;
+}
+
+.beauty-picker-overlay {
+  z-index: 210;
+}
+
+.beauty-picker {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  max-width: 320px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.beauty-picker__title {
+  margin: 0 0 16px;
+  font-size: 1.1rem;
+}
+
+.beauty-picker__list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+}
+
+.beauty-picker__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+
+.beauty-picker__item:hover {
+  background: #f0f7f5;
+  border-color: #7eb8a8;
+}
+
+.beauty-picker__thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.beauty-picker__thumb--empty {
+  background: #e8f2ef;
+  display: block;
+}
+
+.beauty-picker__name {
+  font-size: 0.9rem;
+  color: #1a1a1a;
+}
+
+/* Beauty on Today (Phase 2C) */
+.beauty-today-hint {
+  font-size: 0.85rem;
+  color: #666;
+  margin: 0 0 12px;
+}
+
+.beauty-today-routines {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.beauty-today-routine {
+  border-top: 1px solid #eee;
+  padding-top: 12px;
+}
+
+.beauty-today-routine:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.beauty-today-routine-name {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2d5a4a;
+}
+
+.beauty-today-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.beauty-today-step {
+  padding: 6px 0;
+}
+
+.beauty-today-step-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.beauty-today-step-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.beauty-today-step-name {
+  color: #1a1a1a;
+}
+
+.beauty-today-step-name--done {
+  color: #666;
+  text-decoration: line-through;
+}
+
+/* Beauty progress photos (Phase 2D) */
+.beauty-progress-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.beauty-progress-upload__title {
+  margin: 0 0 16px;
+  font-size: 1.1rem;
+}
+
+.beauty-progress-upload__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.beauty-progress-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.beauty-progress-card {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+}
+
+.beauty-progress-card__img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  background: #f0f7f5;
+}
+
+.beauty-progress-card__meta {
+  padding: 10px 12px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.beauty-progress-card__date {
+  font-weight: 500;
+}
+
+.beauty-progress-card__area {
+  background: #e8f2ef;
+  color: #2d5a4a;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.beauty-progress-card__notes {
+  padding: 6px 12px 0;
+  margin: 0;
+  font-size: 0.85rem;
+  color: #555;
+  line-height: 1.3;
+  flex: 1;
+}
+
+.beauty-progress-card__routine {
+  padding: 4px 12px 0;
+  margin: 0;
+  font-size: 0.8rem;
+  color: #5a7a6e;
+  font-style: italic;
+}
+
+.beauty-progress-card__rating {
+  padding: 4px 12px 0;
+  margin: 0;
+  font-size: 0.8rem;
+  color: #555;
+}
+
+.beauty-progress-ratings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.beauty-progress-rating-btn {
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  background: #fff;
+  font-size: 0.85rem;
+  color: #555;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.beauty-progress-rating-btn:hover {
+  border-color: #b8d4c8;
+  background: #f0f7f5;
+}
+
+.beauty-progress-rating-btn--active {
+  border-color: #2d5a4a;
+  background: #e8f2ef;
+  color: #2d5a4a;
+}
+
+.beauty-progress-card__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+  padding: 8px 12px 12px;
+}
+
+.beauty-progress-card__edit,
+.beauty-progress-card__delete {
+  font-size: 0.85rem;
+  padding: 6px 10px;
+}
