@@ -41,6 +41,20 @@ export type DailyTask = {
   title: string
   completed: boolean
   sort_order: number
+  template_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type TaskTemplate = {
+  id: string
+  user_id: string
+  title: string
+  recurrence_type: 'daily' | 'weekly' | 'weekdays' | 'weekends' | 'persistent'
+  recurrence_days: number[] | null
+  is_active: boolean
+  category?: string | null
+  sort_order: number
   created_at: string
   updated_at: string
 }
@@ -97,6 +111,7 @@ export type BeautyProgressPhoto = {
   area: string
   photo_url: string
   notes: string | null
+  note_category?: string | null
   taken_at: string
   created_at: string
   updated_at: string
@@ -111,3 +126,55 @@ export type ProgressRatingValue = (typeof PROGRESS_RATING_VALUES)[number]
 
 export const BEAUTY_PRODUCTS_BUCKET = 'beauty-products'
 export const BEAUTY_PROGRESS_BUCKET = 'beauty-progress'
+export const WARDROBE_BUCKET = 'wardrobe'
+export const OUTFITS_BUCKET = 'outfits'
+
+export type WardrobeItem = {
+  id: string
+  user_id: string
+  name: string
+  category: string | null
+  color: string | null
+  season: string | null
+  notes: string | null
+  photo_url: string | null
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
+
+export const OUTFIT_SLOT_TYPES = ['top', 'bottom', 'dress', 'outerwear', 'shoes', 'accessory'] as const
+export type OutfitSlotType = (typeof OUTFIT_SLOT_TYPES)[number]
+
+export type Outfit = {
+  id: string
+  user_id: string
+  name: string
+  notes: string | null
+  cover_photo_url: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type OutfitItem = {
+  id: string
+  outfit_id: string
+  wardrobe_item_id: string
+  slot_type: string
+  sort_order: number
+  created_at: string
+}
+
+export const PLANNED_OUTFIT_STATUSES = ['planned', 'worn', 'skipped'] as const
+export type PlannedOutfitStatus = (typeof PLANNED_OUTFIT_STATUSES)[number]
+
+export type PlannedOutfit = {
+  id: string
+  user_id: string
+  outfit_id: string
+  planned_date: string
+  status: string
+  notes: string | null
+  created_at: string
+  updated_at: string
+}

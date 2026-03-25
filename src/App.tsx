@@ -6,7 +6,12 @@ import { LoginPage } from './pages/LoginPage'
 import { Home } from './pages/Home'
 import { Today } from './pages/Today'
 import { Beauty } from './pages/Beauty'
+import { Wardrobe } from './pages/Wardrobe'
+import { OutfitList } from './pages/OutfitList'
+import { OutfitBuilder } from './pages/OutfitBuilder'
+import { PlannedByDate } from './pages/PlannedByDate'
 import { Diary } from './pages/Diary'
+import { Outlet } from 'react-router-dom'
 import { Settings } from './pages/Settings'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -39,6 +44,13 @@ export default function App() {
           <Route index element={<Home />} />
           <Route path="today" element={<Today />} />
           <Route path="beauty" element={<Beauty />} />
+          <Route path="wardrobe" element={<Outlet />}>
+            <Route index element={<Wardrobe />} />
+            <Route path="outfits" element={<OutfitList />} />
+            <Route path="outfits/new" element={<OutfitBuilder />} />
+            <Route path="outfits/:id" element={<OutfitBuilder />} />
+            <Route path="planned" element={<PlannedByDate />} />
+          </Route>
           <Route path="diary" element={<Diary />} />
           <Route path="settings" element={<Settings />} />
         </Route>

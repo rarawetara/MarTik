@@ -9,7 +9,7 @@
 - **Water tracking:** +250 ml per tap, persisted to today’s entry, simple fill animation; optional goal from profile.
 - **Diary (minimal):** List of past days; tap a day to open the same Today layout for that date.
 - **Settings (minimal):** Water goal, timezone.
-- **App shell:** Bottom nav with Home, Today, Diary, Settings; Beauty and Wardrobe stubbed/disabled.
+- **App shell:** Left sidebar nav with Home, Today, Diary, Settings; Beauty and Wardrobe stubbed/disabled.
 - **Russian UI:** All user-facing text (buttons, labels, headings, placeholders, empty states, messages) in Russian.
 
 ## 2. Files created or modified
@@ -19,7 +19,7 @@
 - `src/main.tsx`, `src/App.tsx`
 - `src/lib/supabase.ts`
 - `src/hooks/useGetOrCreateToday.ts`, `src/hooks/useAuth.ts`
-- `src/components/Layout/AppShell.tsx`, `src/components/Layout/BottomNav.tsx`
+- `src/components/Layout/AppShell.tsx`, `src/components/Layout/SideNav.tsx`
 - `src/pages/LoginPage.tsx`, `src/pages/Home.tsx`, `src/pages/Today.tsx`, `src/pages/Diary.tsx`, `src/pages/Settings.tsx`
 - `src/components/WaterWidget.tsx`, `src/components/TaskList.tsx`
 - `src/constants/ru.ts` (Russian copy)

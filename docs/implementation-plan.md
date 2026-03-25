@@ -158,68 +158,51 @@ Phase 2 Beauty includes **products** (cards), **routines** (ordered steps from p
 
 ---
 
-## Phase 3: Wardrobe — Items, Outfit Builder, Saving Outfits
+## Phase 3: Wardrobe
 
-### Goals
-
-- User can add wardrobe items (photo, name, category) and see them as cards in a grid.
-- Outfit builder: user selects/drags wardrobe items into an “outfit” and names it; outfit is saved (outfits + outfit_items).
-- User can view, edit, and delete saved outfits.
-- No date assignment yet; just the wardrobe library and outfit composition.
-- Storage: bucket for wardrobe images; RLS.
-
-### Components to Implement
-
-| Component | Description |
-|-----------|-------------|
-| **Wardrobe screen** | Tab in nav. Grid of wardrobe item cards; filter by category; “+ Add item”; “New outfit”, “Plan outfits” (Plan can go to Phase 4). |
-| **Wardrobe item card** | Image, name, category; tap for detail (edit/delete, “Use in outfit”). |
-| **Add/Edit item** | Modal/sheet: photo upload, name, category. Upload to Storage, save to `wardrobe_items`. |
-| **Outfit builder** | Screen: wardrobe source (list/grid of items) + outfit canvas (slots or list). Add items to outfit (tap or drag); name outfit; Save. Edit outfit: same screen with pre-filled items. |
-| **Outfit card (in list)** | After saving: list of “My outfits” with name and thumbnail (first item or cover). Tap to view/edit or delete. |
-| **Storage integration** | Bucket `wardrobe`; upload on add/edit item; optional `outfit-covers` if custom cover image is supported. |
-
-### Database Tables Used
-
-| Table | Usage in Phase 3 |
-|-------|------------------|
-| **wardrobe_items** | CRUD; image_url from Storage. |
-| **outfits** | Create on “Save outfit”; name, optional cover_image_url. |
-| **outfit_items** | Insert/delete when user adds/removes items from outfit; sort_order for display order. |
-
-**Migrations:** Create `wardrobe_items`, `outfits`, `outfit_items`; RLS; Storage bucket `wardrobe`.
+Phase 3 is split into **Phase 3A** (wardrobe items only) and **Phase 3B** (outfit builder, saving outfits). Implement 3A first; do not start outfit builder or outfit planning in 3A.
 
 ---
 
-## Phase 4: Outfit Planning — Assign to Dates, Outfit of the Day on Dashboard
+### Phase 3A: Wardrobe Items
 
-### Goals
+**Goals:** Add a wardrobe system so the user can upload clothing items as **visual cards** and manage a personal clothing library. No outfit builder, no outfit planning, no calendar/dates.
 
-- User can assign an outfit to a specific date (one outfit per day).
-- Outfit planner UI: calendar or week view; pick a day, choose outfit from saved outfits, assign or change.
-- Home dashboard and Today page show “today’s planned outfit” when one is set; empty state or “Plan your look” when not.
-- Clearing or changing the planned outfit for a day works and updates the dashboard/Today view.
+**Split into reviewable steps:**
 
-### Components to Implement
+- **Phase 3A.1 — Schema + storage:** Create `wardrobe_items` table (id, user_id, name, category, color, season, notes, photo_url, sort_order, created_at, updated_at). Create Storage bucket `wardrobe`, path `{user_id}/{category}/filename.{ext}`. RLS for DB and storage. No `outfits` or `outfit_items` in 3A.
+- **Phase 3A.2 — Upload / create form:** Wardrobe section in nav. Add item: photo upload, name, category (top / bottom / dress / shoes / accessory), optional color, season, notes. Save to `wardrobe_items`; upload photo to `wardrobe` bucket. Russian UI only.
+- **Phase 3A.3 — Cards grid view:** Grid of wardrobe item cards (photo, name, category; optional color, season). Filter by category. Tap card → edit or delete. Visual cards, not raw table. Russian UI.
 
-| Component | Description |
-|-----------|-------------|
-| **Outfit planner screen** | Week strip or calendar; each day shows assigned outfit thumbnail or “Assign.” Tap day → list of saved outfits; tap outfit to assign; “Clear” to remove. “Create new outfit” → Outfit builder. |
-| **Planned outfit card (Home / Today)** | If today has planned outfit: card with outfit name and preview (item thumbnails or cover). Tap → detail or “Change” → Outfit planner with today selected. If none: “Plan your look” CTA → Outfit planner. |
-| **Hook/query for today’s outfit** | Load planned_outfits where user_id and planned_date = today; then load outfit + outfit_items + wardrobe_items for display. |
-| **Navigation** | From Wardrobe: “Plan outfits.” From Home/Today: “Plan your look” / “Change outfit.” |
+**Database:** Only `wardrobe_items` in Phase 3A. **Storage:** Bucket `wardrobe`; path `{user_id}/{category}/filename.{ext}`. **Postponed:** Outfit builder; outfit planning; "New outfit" / "Plan outfits" buttons.
 
-### Database Tables Used
+---
 
-| Table | Usage in Phase 4 |
-|-------|------------------|
-| **planned_outfits** | Insert when user assigns outfit to date; update (replace outfit_id) when changing; delete when clearing. Unique (user_id, planned_date). |
-| **outfits** | Read for planner and for “today’s outfit” card. |
-| **outfit_items** | Read with wardrobe_items to show composed look. |
-| **wardrobe_items** | Read for thumbnails/names on planned outfit card. |
-| **daily_entries** | No new columns; today’s entry used for “today” date. |
+### Phase 3B: Outfit Builder, Saving Outfits
 
-**Migrations:** Create `planned_outfits`; RLS. Tables from Phase 3 already exist.
+**Goals:** Add an Outfit Builder so the user can combine wardrobe items into **saved outfits**. User creates an outfit, chooses items from wardrobe, assigns them to **slots** (top, bottom, dress, outerwear, shoes, accessory), saves with a name (and optional notes), and can view/edit/delete saved outfits. **Phase 3B only:** No outfit planning by date; no connection to Home or Today page; no "Plan outfits" button yet (Phase 3C).
+
+**Split into reviewable steps:**
+
+- **Phase 3B.1 — Schema:** Create `outfits` table (id, user_id, name, notes, created_at, updated_at). Create `outfit_items` table (id, outfit_id, wardrobe_item_id, slot_type, sort_order, created_at). Slot types: top, bottom, dress, outerwear, shoes, accessory. Unique (outfit_id, wardrobe_item_id). RLS: outfits by user_id; outfit_items by outfit ownership. No `planned_outfits` in 3B.
+- **Phase 3B.2 — Create/save outfit flow:** Outfit Builder page/screen (e.g. from Wardrobe: "New outfit"). Wardrobe items as source; outfit canvas with slots. User assigns one item per slot (tap or drag); MVP may allow empty slots. Name (required) and optional notes; Save creates/updates outfit and outfit_items. Russian UI only.
+- **Phase 3B.3 — Outfit list view:** "My outfits" list or grid of saved outfit cards (name + composed preview, e.g. thumbnails by slot). Tap to view detail or edit; delete with confirmation. No link to calendar or "Plan outfits" in Phase 3B.
+
+**Database:** `outfits`, `outfit_items` only. **Relationship:** outfit_items link wardrobe_items to an outfit with slot_type; each row = one item in one slot. **Postponed:** planned_outfits; Outfit Planner; showing outfits on Home or Today.
+
+---
+
+## Phase 3C: Outfit Planning by Date
+
+**Goals:** Allow the user to **assign a saved outfit to a specific date** so that the outfit can later be shown for that day. User can view the planned outfit for a selected day and optionally mark it as **worn** or **skipped**. Planned outfit is a **separate entity** from the outfit (one outfit can be planned on multiple dates). Simple flow; no complex calendar or drag-and-drop weekly planning.
+
+**Split into reviewable steps:**
+
+- **Phase 3C.1 — Schema:** Create `planned_outfits` table: id, user_id, outfit_id, planned_date, **status** (default 'planned'; values: planned, worn, skipped), **notes** (optional), created_at, updated_at. Unique (user_id, planned_date). RLS: user_id = auth.uid(). Do not store date inside outfits.
+- **Phase 3C.2 — Plan outfit action:** From outfit card or outfit detail: "Plan for date" (or similar) → date picker → confirm; insert or update `planned_outfits` (user_id, outfit_id, planned_date, status, notes). From a date view: assign/change/clear outfit for that date. Russian UI only.
+- **Phase 3C.3 — Show planned outfit by date:** For a selected date (e.g. date picker, Today, or Diary day): query `planned_outfits` where user_id and planned_date = selected_date; if row exists, load outfit + outfit_items + wardrobe_items for display. Home and Today: show "today's planned outfit" when row exists for current date; empty state or "Plan your look" when not. Optional: display or edit status (planned/worn/skipped) and notes.
+
+**Database:** `planned_outfits` only (outfits, outfit_items, wardrobe_items already exist). **Relationship:** planned_outfits links outfit_id to a date; one row per (user, date). **Postponed:** Advanced recurrence; complex calendar UI; drag-and-drop weekly grid.
 
 ---
 
@@ -266,8 +249,9 @@ Phase 2 Beauty includes **products** (cards), **routines** (ordered steps from p
 |-------|--------|-------------|-------------|
 | **1** | Auth, daily entries, Home skeleton, Today, water, basic tasks | profiles, daily_entries, daily_tasks | Working app with journal, water, tasks; nav to Home, Today, Diary, Settings. |
 | **2** | Beauty: products (2A), routines (2B), daily logging (2C), progress photos (2D), progress enhancements (2E), scheduling (2F) | beauty_products, beauty_routines, beauty_routine_steps, beauty_logs, beauty_progress_photos; Storage | Product library; routine builder; step completion per day; progress photos; optional routine link and soft ratings; routine scheduling (daily/weekly/monthly); Today shows only due routines. |
-| **3** | Wardrobe items, outfit builder, save outfits | wardrobe_items, outfits, outfit_items; Storage | Wardrobe tab; outfit builder; “My outfits” list. |
-| **4** | Outfit planning by date, outfit of the day | planned_outfits | Outfit planner; today’s outfit on Home and Today. |
+| **3A** | Wardrobe items only (library) | wardrobe_items; Storage `wardrobe` | Wardrobe tab; item cards (photo, name, category, color, season, notes); add/edit/delete; filter. No outfit builder/planning. |
+| **3B** | Outfit builder, save outfits (slots: top/bottom/dress/outerwear/shoes/accessory) | outfits, outfit_items | Outfit Builder screen (wardrobe + slot canvas); create/save outfit; "My outfits" list. No planning by date or Home/Today. |
+| **3C** | Outfit planning by date (status: planned/worn/skipped, notes) | planned_outfits | Assign outfit to date; view by date; today's outfit on Home/Today; simple flow. |
 | **5** | Focus timer, weekly review, polish, sounds | task_sessions; optional weekly_reflections; profiles.settings | Timer on tasks; weekly reflection screen; visual and sound polish. |
 
 ---
@@ -276,8 +260,9 @@ Phase 2 Beauty includes **products** (cards), **routines** (ordered steps from p
 
 - **Phase 1:** Supabase project + Auth → migrations (profiles, daily_entries, daily_tasks) + RLS → getOrCreateToday() → App shell + nav → Auth screen → Home skeleton → Today page + water + tasks → Diary (minimal) → Settings (minimal).
 - **Phase 2:** 2A product library + Storage → 2B routines + steps (soft-delete) → 2C beauty_logs + Today/Beauty execution + Home widget → 2D.1 schema + beauty-progress storage → 2D.2 upload UI → 2D.3 gallery/timeline → 2E.1 schema (routine_id, soft ratings) → 2E.2 upload/edit UI → 2E.3 detail display → 2F.1 schema (cadence_type, weekly_days, monthly_days, is_active) → 2F.2 routine editor scheduling UI → 2F.3 due routine filtering on Today.
-- **Phase 3:** Migrations + Storage for wardrobe → Wardrobe screen + item CRUD → Outfit builder (add items, name, save) → My outfits list + edit/delete.
-- **Phase 4:** planned_outfits migration → Outfit planner screen → today’s outfit query → Planned outfit card on Home and Today.
+- **Phase 3A:** wardrobe_items migration + Storage bucket `wardrobe` (path `{user_id}/{category}/filename`) + RLS → Wardrobe screen + add item form (photo, name, category, color, season, notes) → cards grid + filter + edit/delete. No outfit builder or planning.
+- **Phase 3B:** outfits + outfit_items migrations (slot_type: top/bottom/dress/outerwear/shoes/accessory) → Outfit Builder screen (wardrobe source + slot canvas) → create/save outfit → "My outfits" list (view/edit/delete). No Plan outfits or Home/Today.
+- **Phase 3C:** planned_outfits migration (status, notes) → plan outfit action (from outfit or by date) → show planned outfit by date → today's outfit on Home and Today.
 - **Phase 5:** task_sessions migration → Focus timer UI → Weekly reflection screen + storage → Settings sound toggle → Sound effects → Global visual polish.
 
 ---
@@ -291,6 +276,9 @@ Phase 2 Beauty includes **products** (cards), **routines** (ordered steps from p
 | 1.2     | 2025-03-15 | Phase 2D detailed: beauty_progress_photos schema (daily_entry_id, area, notes, taken_at), storage path {user_id}/{area}/filename; split into 2D.1 schema+storage, 2D.2 upload UI, 2D.3 gallery/timeline; comparison and AI postponed |
 | 1.3     | 2025-03-15 | Phase 2E: progress photo enhancements—optional routine_id, soft ratings (face_condition, hair_quality, hair_length_feeling; 4-level); schema update + upload/edit UI + detail display; no scheduling or AI |
 | 1.4     | 2025-03-15 | Phase 2F: routine scheduling—cadence_type, weekly_days, monthly_days, is_active on beauty_routines; routine editor scheduling UI; due routine filtering on Today; MVP: unscheduled = always due |
+| 1.5     | 2025-03-15 | Phase 3A: wardrobe items only—wardrobe_items schema (photo_url, color, season, notes); Storage bucket `wardrobe`; add/edit/delete item cards; visual grid; no outfit builder/planning. Phase 3B (outfit builder) postponed. |
+| 1.6     | 2025-03-15 | Phase 3B: Outfit Builder—outfits (name, notes) + outfit_items (slot_type: top/bottom/dress/outerwear/shoes/accessory); create/save outfit flow; "My outfits" list; no planning by date or Home/Today. |
+| 1.7     | 2025-03-15 | Phase 3C: Outfit planning by date—planned_outfits (status: planned/worn/skipped, notes); assign outfit to date; view by date; show today's outfit on Home/Today; simple flow. |
 
 ---
 

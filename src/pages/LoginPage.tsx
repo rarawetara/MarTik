@@ -56,12 +56,10 @@ export function LoginPage() {
   }
 
   return (
-    <div className="main" style={{ paddingTop: 48 }}>
-      <div className="card" style={{ maxWidth: 360, margin: '0 auto' }}>
-        <h1 style={{ marginTop: 0 }}>{ru.appName}</h1>
-        <p style={{ color: '#666', marginBottom: 24 }}>
-          {mode === 'login' ? ru.loginPrompt : ru.signUpPrompt}
-        </p>
+    <div className="main login-page">
+      <div className="card login-card login-form-neo">
+        <h1>{ru.appName}</h1>
+        <p className="login-lede">{mode === 'login' ? ru.loginPrompt : ru.signUpPrompt}</p>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="email">{ru.email}</label>
@@ -100,28 +98,40 @@ export function LoginPage() {
               />
             </div>
           )}
-          {error && (
-            <p style={{ color: '#c00', fontSize: '0.875rem', marginBottom: 16 }}>{error}</p>
-          )}
-          {success && (
-            <p style={{ color: '#2d5a4a', fontSize: '0.875rem', marginBottom: 16 }}>{success}</p>
-          )}
-          <button type="submit" disabled={loading} className="btn-primary" style={{ width: '100%' }}>
+          {error && <p className="form-error">{error}</p>}
+          {success && <p className="form-success">{success}</p>}
+          <button type="submit" disabled={loading} className="btn-primary btn-block">
             {loading ? ru.loading : mode === 'login' ? ru.login : ru.signUp}
           </button>
         </form>
-        <p style={{ marginTop: 16, fontSize: '0.875rem', color: '#666' }}>
+        <p className="login-footer">
           {mode === 'login' ? (
             <>
               {ru.noAccount}{' '}
-              <button type="button" onClick={() => { setMode('signup'); setError(null); setSuccess(null); }} className="btn-ghost" style={{ padding: 0, border: 'none', textDecoration: 'underline' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('signup')
+                  setError(null)
+                  setSuccess(null)
+                }}
+                className="btn-link-inline"
+              >
                 {ru.signUp}
               </button>
             </>
           ) : (
             <>
               {ru.hasAccount}{' '}
-              <button type="button" onClick={() => { setMode('login'); setError(null); setSuccess(null); }} className="btn-ghost" style={{ padding: 0, border: 'none', textDecoration: 'underline' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('login')
+                  setError(null)
+                  setSuccess(null)
+                }}
+                className="btn-link-inline"
+              >
                 {ru.login}
               </button>
             </>

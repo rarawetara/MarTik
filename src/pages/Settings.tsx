@@ -99,7 +99,7 @@ export function Settings() {
           value={timezone}
           onChange={(e) => setTimezone(e.target.value)}
           onBlur={save}
-          style={{ width: '100%', padding: '10px 12px', border: '1px solid #ddd', borderRadius: 8 }}
+          className="form-select"
         >
           {TIMEZONES.map((tz) => (
             <option key={tz} value={tz}>
@@ -112,9 +112,9 @@ export function Settings() {
       <button type="button" onClick={save} disabled={saving} className="btn-primary" style={{ marginRight: 8 }}>
         {saving ? ru.loading : ru.save}
       </button>
-      {saved && <span style={{ fontSize: '0.875rem', color: '#2d5a4a' }}>{ru.saved}</span>}
+      {saved && <span className="text-muted">{ru.saved}</span>}
 
-      <hr style={{ margin: '24px 0', border: 'none', borderTop: '1px solid #eee' }} />
+      <hr className="settings-divider" />
 
       <button type="button" onClick={signOut} className="btn-ghost">
         {ru.signOut}

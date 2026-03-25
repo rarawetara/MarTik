@@ -81,46 +81,68 @@ export function BeautyRoutineToday({
       return
     }
     setLoading(true)
-    const { data: routinesData } = await supabase
-      .from('beauty_routines')
-      .select('*')
-      .eq('user_id', userId)
-      .order('sort_order', { ascending: true })
-      .order('created_at', { ascending: false })
-    const routines = (routinesData as BeautyRoutine[]) ?? []
-    const withSteps: RoutineWithSteps[] = []
-    for (const routine of routines) {
-      const { data: stepsData } = await supabase
-        .from('beauty_routine_steps')
-        .select('*, beauty_products(*)')
-        .eq('routine_id', routine.id)
-        .is('deleted_at', null)
+    try {
+      const { data: routinesData, error: routinesError } = await supabase
+        .from('beauty_routines')
+        .select('*')
+        .eq('user_id', userId)
         .order('sort_order', { ascending: true })
-      const rows = (stepsData as Array<BeautyRoutineStep & { beauty_products: BeautyProduct | null }>) ?? []
-      withSteps.push({
-        routine,
-        steps: rows.map((row) => ({
-          step: {
-            id: row.id,
-            routine_id: row.routine_id,
-            product_id: row.product_id,
-            sort_order: row.sort_order,
-            deleted_at: row.deleted_at,
-            created_at: row.created_at,
-            updated_at: row.updated_at,
-          },
-          product: row.beauty_products ?? null,
-        })),
-      })
+      if (routinesError) {
+        console.error('Beauty routines fetch error:', routinesError)
+        setRoutinesWithSteps([])
+        setCompletedStepIds(new Set())
+        return
+      }
+      const routines = (routinesData as BeautyRoutine[]) ?? []
+      const withSteps: RoutineWithSteps[] = []
+      for (const routine of routines) {
+        const { data: stepsData, error: stepsError } = await supabase
+          .from('beauty_routine_steps')
+          .select('*, beauty_products(*)')
+          .eq('routine_id', routine.id)
+          .is('deleted_at', null)
+          .order('sort_order', { ascending: true })
+        if (stepsError) {
+          console.error('Beauty routine steps fetch error:', stepsError)
+          continue
+        }
+        const rows =
+          (stepsData as Array<BeautyRoutineStep & { beauty_products: BeautyProduct | null }>) ?? []
+        withSteps.push({
+          routine,
+          steps: rows.map((row) => ({
+            step: {
+              id: row.id,
+              routine_id: row.routine_id,
+              product_id: row.product_id,
+              sort_order: row.sort_order,
+              deleted_at: row.deleted_at,
+              created_at: row.created_at,
+              updated_at: row.updated_at,
+            },
+            product: row.beauty_products ?? null,
+          })),
+        })
+      }
+      setRoutinesWithSteps(withSteps)
+      const { data: logsData, error: logsError } = await supabase
+        .from('beauty_logs')
+        .select('routine_step_id')
+        .eq('daily_entry_id', dailyEntryId)
+      if (logsError) {
+        console.error('Beauty logs fetch error:', logsError)
+        setCompletedStepIds(new Set())
+        return
+      }
+      const logs = (logsData as { routine_step_id: string }[]) ?? []
+      setCompletedStepIds(new Set(logs.map((l) => l.routine_step_id)))
+    } catch (e) {
+      console.error('BeautyRoutineToday fetch error:', e)
+      setRoutinesWithSteps([])
+      setCompletedStepIds(new Set())
+    } finally {
+      setLoading(false)
     }
-    setRoutinesWithSteps(withSteps)
-    const { data: logsData } = await supabase
-      .from('beauty_logs')
-      .select('routine_step_id')
-      .eq('daily_entry_id', dailyEntryId)
-    const logs = (logsData as { routine_step_id: string }[]) ?? []
-    setCompletedStepIds(new Set(logs.map((l) => l.routine_step_id)))
-    setLoading(false)
   }, [dailyEntryId, userId])
 
   useEffect(() => {
@@ -172,8 +194,10 @@ export function BeautyRoutineToday({
         <h3>{ru.beautyRoutineToday}</h3>
         <p className="beauty-today-hint">{ru.beautyRoutineTodayHint}</p>
         <p className="empty-state">{ru.noRoutinesForToday}</p>
-        <p style={{ marginTop: 8, fontSize: '0.875rem' }}>
-          <Link to="/beauty">{ru.navBeauty}</Link>
+        <p className="page-footer-link" style={{ marginTop: 8 }}>
+          <Link to="/beauty" className="link-text">
+            {ru.navBeauty}
+          </Link>
         </p>
       </div>
     )
@@ -211,8 +235,10 @@ export function BeautyRoutineToday({
           </div>
         ))}
       </div>
-      <p style={{ marginTop: 12, fontSize: '0.875rem' }}>
-        <Link to="/beauty">{ru.navBeauty}</Link>
+      <p className="page-footer-link" style={{ marginTop: 12 }}>
+        <Link to="/beauty" className="link-text">
+          {ru.navBeauty}
+        </Link>
       </p>
     </div>
   )

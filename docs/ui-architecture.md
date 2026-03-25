@@ -181,82 +181,79 @@ Home widgets ──→ Today, Beauty, Focus (Today or modal), Outfit Planner, We
 
 ---
 
-### 3.4 Wardrobe
+### 3.4 Wardrobe (Phase 3A: Items Only)
 
-**Purpose:** Library of clothing items as cards—the user’s digital closet. Entry point to Outfit Builder and Outfit Planner.
+**Purpose:** Library of clothing items as **visual cards**—the user’s digital closet. Phase 3A is items only: add, edit, delete, filter. No Outfit Builder or Outfit Planner in this phase.
 
-**Layout:** Grid of cards (e.g. 2 columns on mobile, 3–4 on desktop). Optional filter by category (top, bottom, dress, shoes, accessory).
+**Layout:** Grid of cards (e.g. 2 columns on mobile, 3–4 on desktop). Optional filter by category (top, bottom, dress, shoes, accessory). Visual cards, not a raw admin table.
 
 **Structure:**
 
 1. **Screen title**
-   - “Wardrobe”. Optional search and category filter.
+   - “Гардероб” (Wardrobe). Optional category filter.
 
 2. **Item grid**
-   - Each item = card: image (dominant), name below. Tap → detail (full image, name, category, “Use in outfit”). Menu: Edit, Delete.
+   - Each item = card: photo (dominant), name, category; optional color, season. Tap → detail or edit (full photo, name, category, color, season, notes). Edit / Delete. No “Use in outfit” in Phase 3A.
 
 3. **Add item**
-   - FAB or “+ Add item”. Flow: upload/take photo → crop → name + category → save. New card appears in grid.
+   - “+ Add item”. Flow: upload/take photo → name, category (top / bottom / dress / shoes / accessory), optional color, season, notes → save. New card appears in grid.
 
-4. **Secondary actions**
-   - “New outfit” → Outfit Builder.
-   - “Plan outfits” → Outfit Planner.
+4. **Phase 3A scope**
+   - No “New outfit” or “Plan outfits” buttons yet. Those belong to Phase 3B and Phase 4.
 
-**Interactions:** Drag to reorder optional. Delete with soft confirmation; if item is in outfits, optional warning.
+**Interactions:** Delete with soft confirmation. All visible UI text in Russian. Outfit builder and outfit planning are not implemented in Phase 3A.
 
 ---
 
-### 3.5 Outfit Builder
+### 3.5 Outfit Builder (Phase 3B)
 
-**Purpose:** Combine clothing cards into one outfit. Drag-and-drop (or multi-select) from wardrobe onto a canvas; name and save the outfit.
+**Purpose:** Combine wardrobe items into saved outfits. User assigns items to **slots** (top, bottom, dress, outerwear, shoes, accessory), names the outfit (and optional notes), and saves. Phase 3B: no outfit planning by date, no display on Home or Today.
 
-**Layout:** Two main areas: **wardrobe** (scrollable list or grid of items) and **outfit canvas** (slots or freeform area). On mobile, canvas can be below wardrobe; on desktop, side-by-side.
+**Layout:** Two main areas: **wardrobe** (scrollable list or grid of items) and **outfit canvas** with **slots**. On mobile, canvas can be below wardrobe; on desktop, side-by-side. Visual, card-based. All visible UI text in Russian.
 
 **Structure:**
 
 1. **Header**
-   - “New outfit” or “Edit outfit”. Optional “Cancel” / “Back”.
+   - "New outfit" / "Edit outfit". "Cancel" / "Back".
 
 2. **Wardrobe source**
-   - All (or filtered) wardrobe items as draggable cards. Alternative: multi-select mode, then “Add to outfit”.
+   - All (or filtered) wardrobe items as selectable/draggable cards. User picks an item then assigns it to a slot, or drags onto slot.
 
-3. **Outfit canvas**
-   - Slots (e.g. top, bottom, shoes, accessory) or a single “drop zone”. User drops items onto slots; each slot shows one item thumbnail. Empty slots show placeholder (e.g. “Add top”).
-   - Or: list of “Items in this outfit” with drag handle to reorder. Remove = drag off or “×”.
+3. **Outfit canvas — slots**
+   - Slots: **top**, **bottom**, **dress**, **outerwear**, **shoes**, **accessory**. Each slot shows one assigned item (thumbnail) or placeholder. MVP may allow empty slots. One item per slot; same item cannot appear twice.
 
-4. **Outfit name**
-   - Text field: “Name your outfit” (e.g. “Coffee date look”).
+4. **Outfit name and notes**
+   - Name (required). Optional notes field.
 
 5. **Save**
-   - “Save outfit” creates the outfit and optionally opens Outfit Planner to assign to a date, or returns to Wardrobe/outfit list.
+   - "Save" creates or updates the outfit; success feedback; return to "My outfits" list. No link to Outfit Planner or calendar in Phase 3B.
 
-**Interactions:** Drag item from wardrobe to canvas (or tap to add). Reorder within canvas. Name required (or default “Outfit 1”). Save → success feedback (e.g. checkmark, sound).
+6. **My outfits list (Phase 3B)**
+   - List or grid of saved outfit cards (name + composed preview, e.g. thumbnails by slot). Tap to view detail or edit; delete with confirmation.
 
----
+**Interactions:** Assign item from wardrobe to slot (tap or drag). Remove from slot (e.g. X). Name required. Save → success feedback. No "Plan outfits" in Phase 3B.
 
-### 3.6 Outfit Planner
+### 3.6 Outfit Planner (Phase 3C)
 
-**Purpose:** Assign outfits to specific days (weekly or any date). User sees a week (or month) and picks an outfit per day; dashboard and Today show “today’s planned outfit”.
+**Purpose:** Allow the user to **assign a saved outfit to a specific date** and view the planned outfit for a selected day. Simple flow: from outfit card or outfit detail, user chooses a date to plan; or by date, user assigns/changes/clears the outfit. Optional status (planned / worn / skipped) and notes per planned day. Home and Today can show “today’s planned outfit”. No complex calendar or drag-and-drop weekly grid in Phase 3C.
 
-**Layout:** Calendar or week strip + detail. Clear indication of which days have an outfit assigned.
+**Layout:** Simple planning flow: (1) From “My outfits” or outfit detail: “Plan for date” → date picker → confirm. (2) Or: pick a date (simple date picker or list) → show planned outfit for that date; assign / change / clear. Optional status and notes for the planned day.
 
 **Structure:**
 
-1. **Header**
-   - “Plan outfits” or “Outfit planner”. Week navigation (prev/next) or month view.
+1. **Plan from outfit**
+   - From outfit card or outfit detail: “Plan for date” (or “Assign to date”) → date picker → confirm. Creates/updates planned_outfits row (user_id, outfit_id, planned_date, status, notes).
 
-2. **Date grid / list**
-   - Rows or cells per day (e.g. next 7 or 14 days, or month grid). Each day shows: date, optional thumbnail if outfit assigned, or “Assign”.
+2. **View by date**
+   - User selects a date → show planned outfit for that date (if any). Option to change outfit, clear, or set status (planned / worn / skipped) and notes.
 
-3. **Day detail**
-   - When user taps a day: list of saved outfits (thumbnails + names). Tap outfit to assign to that day. “Clear” to remove assignment. “Create new outfit” → Outfit Builder.
+3. **Today / Home**
+   - When planned_outfits has a row for current date: show “planned outfit” card (outfit name, preview). Tap to view detail or change. If none: empty state or “Plan your look” CTA.
 
-4. **Today highlight**
-   - Today’s cell clearly marked; assigned outfit shown. Same data as Home “Planned outfit” card.
+4. **Status (optional)**
+   - For a planned day: optional control to mark as planned / worn / skipped; optional notes field. All visible UI text in Russian.
 
-**Interactions:** Tap day → assign or change outfit. One outfit per day. Changing outfit = select different from list; clearing = remove planned_outfit row for that date.
-
----
+**Interactions:** Assign outfit to date (from outfit or by date). View planned outfit for selected date. Change or clear. Optionally set status and notes. One outfit per user per day.
 
 ### 3.7 Diary / History
 
@@ -316,9 +313,9 @@ Home widgets ──→ Today, Beauty, Focus (Today or modal), Outfit Planner, We
 | Home            | Moodboard dashboard          | Tab         | Greeting, outfit card, water, beauty preview, focus, quick actions |
 | Today           | Daily record for one day     | Tab         | Date header, habits, beauty, tasks, water, mood, notes, daily photo |
 | Beauty          | Product library + routines + execution + progress | Tab         | Product library, routine builder (Phase 2F: scheduling), routine view (due only), progress photos (Phase 2) |
-| Wardrobe        | Clothing item library        | Tab         | Item grid, add item, links to Outfit Builder & Planner |
-| Outfit Builder  | Compose outfit from items    | From Wardrobe/Planner | Wardrobe source, canvas, name, save |
-| Outfit Planner  | Assign outfits to dates      | From Wardrobe/Home   | Date grid, outfit list, assign/clear |
+| Wardrobe        | Clothing item library (Phase 3A: items only) | Tab         | Item grid (visual cards), add/edit/delete item; photo, name, category, color, season, notes. No Outfit Builder/Planner in 3A. |
+| Outfit Builder  | Compose outfit from items (Phase 3B: slots, save, "My outfits") | From Wardrobe | Wardrobe source, slot canvas (top/bottom/dress/outerwear/shoes/accessory), name, notes, save; no Plan/calendar in 3B |
+| Outfit Planner (Phase 3C) | Assign outfit to date; view by date | From Wardrobe/Home/outfit | Plan from outfit (date picker) or by date; status (planned/worn/skipped), notes; today's outfit on Home/Today |
 | Diary           | Past days list/calendar      | Tab         | Timeline or calendar, day view (same as Today) |
 | Settings        | Preferences                  | Tab         | Sound, water goal, timezone, profile |
 
@@ -339,6 +336,9 @@ Home widgets ──→ Today, Beauty, Focus (Today or modal), Outfit Planner, We
 |---------|------------|-----------------|
 | 1.0     | 2025-03-15 | Initial UI architecture |
 | 1.1     | 2025-03-15 | Phase 2F: routine scheduling in builder (cadence, weekly/monthly pickers); Today shows only due routines; optional “Сегодняшний уход” / “Other routines” |
+| 1.2     | 2025-03-15 | Phase 3A: Wardrobe items only—visual cards grid, add/edit/delete (photo, name, category, color, season, notes); no Outfit Builder or Planner links |
+| 1.3     | 2025-03-15 | Phase 3B: Outfit Builder—slots (top, bottom, dress, outerwear, shoes, accessory), create/save outfit, "My outfits" list; no planning by date or Home/Today |
+| 1.4     | 2025-03-15 | Phase 3C: Outfit planning by date—assign outfit to date (planned_outfits); view by date; optional status (planned/worn/skipped), notes; simple flow; today's outfit on Home/Today |
 
 ---
 

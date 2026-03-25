@@ -1,13 +1,17 @@
 import { Outlet } from 'react-router-dom'
-import { BottomNav } from './BottomNav'
+import { SideNav } from './SideNav'
+import { GlobalTaskFAB } from '../GlobalTaskFAB'
 
 export function AppShell() {
   return (
     <div className="app-shell">
-      <main className="main">
-        <Outlet />
-      </main>
-      <BottomNav />
+      <SideNav />
+      <div className="app-shell__content">
+        <main className="main">
+          <Outlet />
+        </main>
+      </div>
+      <GlobalTaskFAB />
     </div>
   )
 }

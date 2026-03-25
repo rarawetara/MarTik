@@ -166,9 +166,9 @@ Records “routine step X was completed on day Y.” One row per step per day. C
 
 ---
 
-#### `wardrobe_items`
+#### `wardrobe_items` (Phase 3A)
 
-Clothing items (tops, bottoms, shoes, etc.) with photo and category.
+Clothing items (tops, bottoms, shoes, accessories, etc.) with photo and metadata. Each item is a card in the user's wardrobe library. Phase 3A: items only; no outfit_items or planned_outfits usage yet.
 
 | Column     | Type        | Constraints | Description |
 |------------|-------------|-------------|-------------|
@@ -176,56 +176,64 @@ Clothing items (tops, bottoms, shoes, etc.) with photo and category.
 | user_id    | uuid        | FK → profiles(id) ON DELETE CASCADE, NOT NULL | |
 | name       | text        | NOT NULL   | e.g. "White linen shirt" |
 | category   | text        |             | 'top' | 'bottom' | 'dress' | 'shoes' | 'accessory' |
-| image_url  | text        |             | Supabase Storage URL |
+| color      | text        |             | Optional color (e.g. "white", "navy") |
+| season     | text        |             | Optional season (e.g. "summer", "winter", "all") |
+| notes      | text        |             | Optional user notes |
+| photo_url  | text        |             | Supabase Storage URL (bucket `wardrobe`) |
 | sort_order | int         | default 0  | Display order in wardrobe |
 | created_at | timestamptz | default now() | |
 | updated_at | timestamptz | default now() | |
 
 ---
 
-#### `outfits`
+#### `outfits` (Phase 3B)
 
-Named outfit (e.g. “Summer Friday”); actual composition is in `outfit_items`.
+Saved outfit entity: a named look composed of wardrobe items. Phase 3B: create/save/view/edit/delete outfits only; no assignment to dates (Phase 4) or display on Home/Today yet.
 
-| Column          | Type        | Constraints | Description |
-|-----------------|-------------|-------------|-------------|
-| id              | uuid        | PK, default gen_random_uuid() | |
-| user_id         | uuid        | FK → profiles(id) ON DELETE CASCADE, NOT NULL | |
-| name            | text        | NOT NULL   | e.g. "Coffee date look" |
-| cover_image_url | text        |             | Optional composite/hero image for the outfit |
-| created_at      | timestamptz | default now() | |
-| updated_at      | timestamptz | default now() | |
+| Column     | Type        | Constraints | Description |
+|------------|-------------|-------------|-------------|
+| id         | uuid        | PK, default gen_random_uuid() | |
+| user_id    | uuid        | FK → profiles(id) ON DELETE CASCADE, NOT NULL | |
+| name       | text        | NOT NULL   | e.g. "Coffee date look" |
+| notes      | text        |             | Optional user notes (Phase 3B) |
+| created_at | timestamptz | default now() | |
+| updated_at | timestamptz | default now() | |
+
+Optional for later: `cover_image_url` (composite/hero image). Not required for Phase 3B MVP.
 
 ---
 
-#### `outfit_items`
+#### `outfit_items` (Phase 3B)
 
-Junction: which wardrobe items belong to an outfit, and in what order.
+Links wardrobe items to an outfit with a **slot type**. Each row = one wardrobe item in one outfit, assigned to a slot (top, bottom, dress, outerwear, shoes, accessory). Same item cannot appear twice in one outfit.
 
 | Column           | Type        | Constraints | Description |
 |------------------|-------------|-------------|-------------|
 | id               | uuid        | PK, default gen_random_uuid() | |
 | outfit_id        | uuid        | FK → outfits(id) ON DELETE CASCADE, NOT NULL | |
 | wardrobe_item_id | uuid        | FK → wardrobe_items(id) ON DELETE CASCADE, NOT NULL | |
-| sort_order       | int         | default 0  | Order in outfit (e.g. top=0, bottom=1, shoes=2) |
+| slot_type        | text        |             | 'top' \| 'bottom' \| 'dress' \| 'outerwear' \| 'shoes' \| 'accessory' — which slot this item fills |
+| sort_order       | int         | default 0  | Display order within outfit (e.g. for multiple accessories) |
 | created_at       | timestamptz | default now() | |
 
-**Unique:** `(outfit_id, wardrobe_item_id)` — same item cannot appear twice in one outfit.
+**Unique:** `(outfit_id, wardrobe_item_id)` — same item cannot appear twice in one outfit. MVP may allow some slots to be empty (no row for that slot).
 
 ---
 
-#### `planned_outfits`
+#### `planned_outfits` (Phase 3C)
 
-Assigns an outfit to a specific date. One outfit per user per date (today’s planned look).
+Assigns a saved outfit to a specific date. A **planned outfit** is a separate entity from the outfit: one outfit can be planned on multiple different dates. At most one planned outfit per user per day. Optional status (planned / worn / skipped) and notes.
 
-| Column      | Type        | Constraints | Description |
-|-------------|-------------|-------------|-------------|
-| id          | uuid        | PK, default gen_random_uuid() | |
-| user_id     | uuid        | FK → profiles(id) ON DELETE CASCADE, NOT NULL | |
-| outfit_id   | uuid        | FK → outfits(id) ON DELETE CASCADE, NOT NULL | |
-| planned_date| date        | NOT NULL   | Date this outfit is planned for |
-| created_at  | timestamptz | default now() | |
-| updated_at  | timestamptz | default now() | |
+| Column       | Type        | Constraints | Description |
+|--------------|-------------|-------------|-------------|
+| id           | uuid        | PK, default gen_random_uuid() | |
+| user_id      | uuid        | FK → profiles(id) ON DELETE CASCADE, NOT NULL | |
+| outfit_id    | uuid        | FK → outfits(id) ON DELETE CASCADE, NOT NULL | |
+| planned_date | date        | NOT NULL   | Date this outfit is planned for |
+| status       | text        | default 'planned' | Values: planned, worn, skipped (Phase 3C) |
+| notes        | text        |             | Optional notes for this planned instance |
+| created_at   | timestamptz | default now() | |
+| updated_at   | timestamptz | default now() | |
 
 **Unique:** `(user_id, planned_date)` — at most one planned outfit per user per day.
 
@@ -302,12 +310,12 @@ Multiple photos per day per area are allowed. All new columns are optional; exis
 | beauty_progress_photos| profiles, daily_entries; optional → beauty_routines | N progress photos per user; each tied to a daily_entry (day) and area (face/hair); optional routine_id and soft ratings (Phase 2E) |
 | wardrobe_items        | profiles               | N items per user |
 | outfits          | profiles               | N outfits per user |
-| outfit_items     | outfits, wardrobe_items| N items per outfit; many-to-many outfits ↔ wardrobe_items |
-| planned_outfits  | profiles, outfits      | N plans per user; one outfit per (user, date) |
+| outfit_items     | outfits, wardrobe_items| N items per outfit; each row has slot_type (top/bottom/dress/outerwear/shoes/accessory); Phase 3B |
+| planned_outfits  | profiles, outfits      | N plans per user; one per (user, date); status (planned/worn/skipped), notes (Phase 3C) |
 | daily_tasks      | profiles               | N tasks per user |
 | task_sessions    | daily_tasks, daily_entries | N sessions per task, N sessions per day |
 
-**Outfit planning:** An outfit is composed of wardrobe items via `outfit_items`. `planned_outfits` assigns an `outfit_id` to a `planned_date`. The dashboard and Today page use `planned_date = current date` and `user_id = auth.uid()` to show “today’s planned outfit.”
+**Outfit composition (Phase 3B):** An outfit is composed of wardrobe items via `outfit_items`; each row has `slot_type` (top, bottom, dress, outerwear, shoes, accessory). **Outfit planning (Phase 3C):** `planned_outfits` is a separate entity: it assigns an `outfit_id` to a `planned_date` (one per user per day); optional `status` (planned/worn/skipped) and `notes`. One outfit can be planned on multiple dates. Dashboard and Today show today's planned outfit when a row exists for current date.
 
 ---
 
@@ -354,9 +362,10 @@ function getOrCreateToday(userId: uuid):
 
 ### 3.2 Resolving “Today’s Planned Outfit”
 
-- Query: `planned_outfits` where `user_id = auth.uid()` and `planned_date = current_date` (in user timezone).
+- Query: `planned_outfits` where `user_id = auth.uid()` and `planned_date = current_date` (in user timezone). Phase 3C: row includes optional `status` (planned/worn/skipped) and `notes`.
 - If a row exists, load `outfits` by `outfit_id`, then load `outfit_items` + `wardrobe_items` for that outfit to show the composed look (names, images) on the Home dashboard and Today page.
-- If no row exists, show an empty state or “Plan your look” CTA.
+- **Planned outfit for any date:** To show planned outfit for a selected day (e.g. date picker or Diary): same query with `planned_date = selected_date`. One row per (user, date); optional status/notes for that day.
+- If no row exists for the date, show an empty state or “Plan your look” CTA.
 
 ---
 
@@ -391,7 +400,7 @@ All images are stored in **Supabase Storage** with Row Level Security so only th
 |-------------------|-----------------------------|----------------------------|
 | `beauty-products` | Beauty product photos       | `{user_id}/{product_id}.{ext}` or `{user_id}/{uuid}.{ext}` |
 | `beauty-progress` | Face/hair progress photos (Phase 2D) | `{user_id}/{area}/filename.{ext}` (e.g. `{user_id}/face/abc.webp`) |
-| `wardrobe`        | Clothing item photos       | `{user_id}/{item_id}.{ext}` or `{user_id}/{uuid}.{ext}` |
+| `wardrobe`        | Clothing item photos (Phase 3A) | `{user_id}/{category}/filename.{ext}` (e.g. `{user_id}/top/abc.webp`) |
 | `outfit-covers`   | Optional outfit cover image | `{user_id}/{outfit_id}.{ext}` |
 | `daily-photos`    | Today page daily photos     | `{user_id}/{entry_date}/{uuid}.{ext}` |
 
@@ -411,11 +420,11 @@ All images are stored in **Supabase Storage** with Row Level Security so only th
 - **RLS (storage):** Users can read/write only objects under `storage.objects` where the path prefix matches their `auth.uid()` (e.g. `(storage.foldername(name))[1] = auth.uid()::text`).
 - **Metadata:** Table `beauty_progress_photos` is the source of truth; no duplicate data in `daily_entries.progress_photos` required for Phase 2D.
 
-### 4.4 Clothing Photos (Wardrobe)
+### 4.4 Clothing Photos (Wardrobe — Phase 3A)
 
-- **Upload:** To `wardrobe/{user_id}/{item_id}.{ext}` or `{user_id}/{uuid}.{ext}` when creating a new item (generate UUID client-side or on insert).
-- **URL:** Set `wardrobe_items.image_url` to the Storage public URL.
-- **Policy:** Only the authenticated user can read/write `wardrobe/{user_id}/*`.
+- **Bucket:** `wardrobe` (separate bucket for wardrobe item photos). Path: **`{user_id}/{category}/filename.{ext}`** (e.g. `{user_id}/top/abc123.webp`). Per-user folder and category subfolder; RLS restricts by first path segment = `auth.uid()`.
+- **Upload:** When creating or updating a wardrobe item, upload file to `wardrobe/{user_id}/{category}/{unique_id}.{ext}`; then set `wardrobe_items.photo_url` to the Storage public URL.
+- **Policy:** Only the authenticated user can read/write objects under their `{user_id}/*` prefix in the `wardrobe` bucket (see §6.4).
 
 ### 4.5 Outfit Cover Images (Optional)
 
@@ -441,10 +450,10 @@ All images are stored in **Supabase Storage** with Row Level Security so only th
    - User creates an outfit in the Outfit builder and adds items via `outfit_items` (each row = one `wardrobe_item_id` + `sort_order`).  
    - The outfit is stored in `outfits`; its “composition” is the set of rows in `outfit_items` for that `outfit_id`.
 
-2. **Assigning an outfit to a date**  
-   - User selects a date (e.g. today or a future date) and selects an outfit.  
-   - App inserts or updates `planned_outfits`: `(user_id, outfit_id, planned_date)`.  
-   - Unique on `(user_id, planned_date)` means one outfit per day; “change outfit for this day” is an update to the same row (new `outfit_id`).
+2. **Assigning an outfit to a date (Phase 3C)**  
+   - User selects a date (e.g. today or a future date) and selects an outfit (from outfit card/detail or by date).  
+   - App inserts or updates `planned_outfits`: `(user_id, outfit_id, planned_date, status, notes)`. Default status `'planned'`; optional later: mark as `'worn'` or `'skipped'`.  
+   - Unique on `(user_id, planned_date)` means one outfit per day; “change outfit for this day” is an update to the same row (new `outfit_id`). Planned outfit is separate from outfit entity; one outfit can be planned on many dates.
 
 3. **Displaying today’s planned outfit on the dashboard**  
    - On load, call `getOrCreateToday()` so “today” is defined.  
@@ -578,6 +587,9 @@ Repeat for `beauty-products`, `beauty-progress`, `outfit-covers`, `daily-photos`
 |---------|------------|------------------|
 | 1.0     | 2025-03-15 | Initial SDD      |
 | 1.1     | 2025-03-15 | Phase 2F: beauty_routines scheduling (cadence_type, weekly_days, monthly_days, is_active); §3.4 due routine computation |
+| 1.2     | 2025-03-15 | Phase 3A: wardrobe_items (photo_url, color, season, notes); separate bucket `wardrobe`, path {user_id}/{category}/filename; §4.4 |
+| 1.3     | 2025-03-15 | Phase 3B: outfits (name, notes) + outfit_items (slot_type: top/bottom/dress/outerwear/shoes/accessory); create/save outfits; no planned_outfits or Home/Today yet |
+| 1.4     | 2025-03-15 | Phase 3C: planned_outfits extended with status (planned/worn/skipped), notes; assign outfit to date; view by date; simple flow |
 
 ---
 

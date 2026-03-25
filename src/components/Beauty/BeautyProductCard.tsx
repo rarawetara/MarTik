@@ -1,68 +1,61 @@
+import { Pencil, Trash2 } from 'lucide-react'
 import type { BeautyProduct } from '../../lib/supabase'
 import { ru } from '../../constants/ru'
 
-type BeautyProductCardProps = {
-  product: BeautyProduct
-  onEdit: (product: BeautyProduct) => void
-  onDelete: (product: BeautyProduct) => void
-}
-
-const areaLabels: Record<string, string> = {
+const AREA_LABELS: Record<string, string> = {
   face: ru.productAreaFace,
   hair: ru.productAreaHair,
   body: ru.productAreaBody,
 }
 
-const timeLabels: Record<string, string> = {
+const TIME_LABELS: Record<string, string> = {
   morning: ru.productTimeMorning,
   evening: ru.productTimeEvening,
   anytime: ru.productTimeAnytime,
 }
 
-export function BeautyProductCard({ product, onEdit, onDelete }: BeautyProductCardProps) {
-  const areaLabel = product.area ? areaLabels[product.area] ?? product.area : null
-  const timeLabel = product.time_of_day ? timeLabels[product.time_of_day] ?? product.time_of_day : null
-  const subtitle = [product.category, areaLabel, timeLabel].filter(Boolean).join(' · ')
+type Props = {
+  product: BeautyProduct
+  onEdit: (product: BeautyProduct) => void
+  onDelete: (product: BeautyProduct) => void
+}
+
+export function BeautyProductCard({ product, onEdit, onDelete }: Props) {
+  const meta = [product.category, AREA_LABELS[product.area ?? ''], TIME_LABELS[product.time_of_day ?? '']]
+    .filter(Boolean)
+    .join(' · ')
 
   return (
-    <article className="beauty-product-card" onClick={() => onEdit(product)}>
-      <div className="beauty-product-card__image-wrap">
+    <article className="catalog-card" onClick={() => onEdit(product)}>
+      <div className="catalog-card__media">
         {product.image_url ? (
-          <img
-            src={product.image_url}
-            alt={product.name}
-            className="beauty-product-card__image"
-          />
+          <img src={product.image_url} alt={product.name} className="catalog-card__img" />
         ) : (
-          <div className="beauty-product-card__placeholder" aria-hidden />
+          <div className="catalog-card__placeholder" aria-hidden />
         )}
       </div>
-      <div className="beauty-product-card__body">
-        <h3 className="beauty-product-card__name">{product.name}</h3>
-        {subtitle && <p className="beauty-product-card__meta">{subtitle}</p>}
+
+      <div className="catalog-card__body">
+        <h3 className="catalog-card__name">{product.name}</h3>
+        {meta && <p className="catalog-card__meta">{meta}</p>}
       </div>
-      <div className="beauty-product-card__actions">
+
+      <div className="catalog-card__actions">
         <button
           type="button"
-          className="beauty-product-card__btn beauty-product-card__btn--edit"
-          onClick={(e) => {
-            e.stopPropagation()
-            onEdit(product)
-          }}
+          className="catalog-card__btn catalog-card__btn--edit"
+          onClick={(e) => { e.stopPropagation(); onEdit(product) }}
           aria-label={ru.editProduct}
         >
-          {ru.editProduct}
+          <Pencil size={14} />
         </button>
         <button
           type="button"
-          className="beauty-product-card__btn beauty-product-card__btn--delete"
-          onClick={(e) => {
-            e.stopPropagation()
-            onDelete(product)
-          }}
+          className="catalog-card__btn catalog-card__btn--delete"
+          onClick={(e) => { e.stopPropagation(); onDelete(product) }}
           aria-label={ru.delete}
         >
-          {ru.delete}
+          <Trash2 size={14} />
         </button>
       </div>
     </article>

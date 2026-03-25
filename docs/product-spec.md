@@ -110,14 +110,28 @@ The main screen must **not** feel like a corporate productivity dashboard (widge
 
 ### 3.3 Wardrobe System
 
-**Concept:** The user builds a digital wardrobe by uploading photos of clothing items (tops, bottoms, shoes, accessories) as cards. Items can be combined into **outfits**.
+**Concept:** The user builds a digital wardrobe by uploading photos of clothing items as **cards**. Each item has a photo, name, category, and optional metadata (color, season, notes). Items are shown in a visual card layout. Later, items can be combined into **outfits** (Phase 3B) and assigned to dates (Phase 3C).
 
-**User flow:**
+**Phase 3A — Wardrobe items (library only):**
 
-1. **Setup:** User uploads item photos, adds labels (e.g. “White linen shirt”), optionally categories (top, bottom, dress, shoes, etc.).
-2. **Outfit creation:** User selects multiple items and saves as an outfit (e.g. “Summer Friday”).
-3. **Outfit planning:** User assigns an outfit to a specific **date** (today, tomorrow, or any day).
-4. **On the day:** The main dashboard shows the **planned look** for that day (outfit card with photo and items), so the user sees “what I’m wearing today” at a glance.
+- **Setup:** User opens the Wardrobe section and sees a grid of clothing cards (photo, name, category; optional color, season).
+- **Add item:** User uploads a clothing photo, enters name, category (top, bottom, dress, shoes, accessory), optional color, season, and notes. Card appears in the library.
+- **Edit / delete:** User can edit any card or delete with soft confirmation. Visual, calm, personal; all UI text in Russian.
+- **No outfit builder or planning yet:** Phase 3A is only the item library. Outfit builder and outfit planning come in later phases.
+
+**Phase 3B — Outfit Builder (saved outfits only):**
+
+- **Create outfit:** User can create an outfit, choose wardrobe items, and assign them to **slots** (e.g. top, bottom, dress, outerwear, shoes, accessory). MVP may allow some slots to be empty.
+- **Save and view:** User saves the outfit with a name (and optional notes); the outfit appears in “My outfits.” User can view saved outfits later, edit (add/remove items, change name), or delete.
+- **Visual, card-based:** Outfit Builder is a dedicated page/section: wardrobe items as source, outfit canvas with slots; saved outfits shown as cards (e.g. collage of item thumbnails). All visible UI text in Russian.
+- **No planning or Home/Today in 3B:** Phase 3B does not assign outfits to dates, does not show outfits on the Home dashboard or Today page, and does not implement the Outfit Planner. Those belong to Phase 3C.
+
+**Phase 3C — Outfit planning by date:**
+
+- **Assign to date:** User can choose a saved outfit and assign it to a specific date. The planned outfit is stored as a separate entity (`planned_outfits`); one outfit can be planned on multiple different dates. No date is stored inside the outfit itself.
+- **View by date:** User can view which outfit is planned for a selected day (e.g. from a simple date picker or from the outfit card/detail by choosing a date). Home and Today can show “today’s planned outfit” when one is set.
+- **Status (optional):** A planned outfit can have a status: **planned**, **worn**, or **skipped**. User can optionally mark the outfit as worn or skipped later (e.g. on or after that day). Simple and stable; no complex calendar or drag-and-drop weekly planning in this phase.
+- **UI:** Simple planning flow: from an outfit card or outfit detail, user chooses a date to plan; planned outfit for a date can be viewed and optionally updated (change outfit, clear, or set status). All visible UI text in Russian.
 
 ---
 
@@ -229,6 +243,9 @@ Navigation to deeper sections (full journal, full wardrobe, beauty progress, pas
 |---------|------------|-----------------|
 | 1.0     | 2025-03-15 | Initial product spec |
 | 1.1     | 2025-03-15 | Phase 2F: routine scheduling (daily/weekly/monthly); Today shows only due routines; MVP behavior for unscheduled |
+| 1.2     | 2025-03-15 | Phase 3A: Wardrobe items (library only)—photo, name, category, color, season, notes; no outfit builder/planning yet |
+| 1.3     | 2025-03-15 | Phase 3B: Outfit Builder—create/save outfits from wardrobe items; slots (top, bottom, dress, outerwear, shoes, accessory); view/edit/delete saved outfits; no planning by date or Home/Today yet |
+| 1.4     | 2025-03-15 | Phase 3C: Outfit planning by date—assign saved outfit to date (planned_outfits); view planned outfit for selected day; optional status (planned/worn/skipped) and notes; simple flow; no complex calendar |
 
 ---
 
