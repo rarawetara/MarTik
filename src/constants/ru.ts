@@ -11,6 +11,8 @@ export const ru = {
   envMissingVars:
     'Нужны: VITE_SUPABASE_URL (полная ссылка вида https://xxxx.supabase.co) и VITE_SUPABASE_ANON_KEY (ключ anon). Supabase → Project Settings → API.',
   envMissingLocal: 'Локально создайте файл .env в корне проекта (см. .env.example).',
+  envWrongPostgresUrl:
+    'Похоже, в VITE_SUPABASE_URL попала строка подключения к базе (postgresql://… или порт :5432). В браузере нужна другая ссылка: Supabase → Project Settings → API → скопируйте Project URL — вид https://xxxx.supabase.co (без db. и без :5432).',
 
   // Auth
   login: 'Войти',
