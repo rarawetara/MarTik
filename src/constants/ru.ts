@@ -24,6 +24,7 @@ export const ru = {
   authError: 'Ошибка входа. Проверьте email и пароль.',
   signUpError: 'Ошибка регистрации.',
   signupSuccessConfirmEmail: 'Регистрация прошла успешно. Подтвердите email по ссылке из письма.',
+  errorEmailNotConfirmed: 'Сначала подтвердите email по ссылке из письма (проверьте «Спам»).',
   errorUserExists: 'Этот email уже зарегистрирован.',
   errorRateLimit: 'Слишком много попыток. Попробуйте позже.',
   errorInvalidLogin: 'Неверный email или пароль.',

@@ -8,7 +8,9 @@ function mapAuthError(message: string): string {
   const m = message.toLowerCase()
   if (m.includes('already') && (m.includes('registered') || m.includes('exists'))) return ru.errorUserExists
   if (m.includes('rate') || m.includes('429') || m.includes('too many')) return ru.errorRateLimit
-  if (m.includes('invalid') || m.includes('credentials') || m.includes('email') && m.includes('password')) return ru.errorInvalidLogin
+  if (m.includes('not confirmed') || m.includes('email_not_confirmed')) return ru.errorEmailNotConfirmed
+  if (m.includes('invalid login credentials') || m.includes('invalid credentials')) return ru.errorInvalidLogin
+  if (m.includes('invalid') && m.includes('password')) return ru.errorInvalidLogin
   return ru.authError
 }
 
@@ -35,7 +37,13 @@ export function LoginPage() {
         const { error: err } = await supabase.auth.signInWithPassword({ email, password })
         if (err) setError(mapAuthError(err.message))
       } else {
-        const { data, error: err } = await supabase.auth.signUp({ email, password })
+        const redirectTo =
+          typeof window !== 'undefined' ? `${window.location.origin}/` : undefined
+        const { data, error: err } = await supabase.auth.signUp({
+          email,
+          password,
+          options: redirectTo ? { emailRedirectTo: redirectTo } : undefined,
+        })
         if (err) {
           setError(mapAuthError(err.message))
           return
