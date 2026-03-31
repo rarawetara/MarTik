@@ -62,12 +62,34 @@ function isValidHttpUrl(s: string): boolean {
   }
 }
 
+/** Ключ (sb_publishable / JWT) ошибочно положили в поле URL. */
+function rawStringLooksLikeApiKey(s: string): boolean {
+  const t = s.trim()
+  return (
+    t.includes('sb_publishable_') ||
+    t.includes('sb_secret_') ||
+    /^eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+/i.test(t.split(/[\s/?#]/)[0] ?? '')
+  )
+}
+
+function looksLikeProjectHttpsUrl(s: string): boolean {
+  const t = s.trim()
+  return /^https?:\/\//i.test(t) && t.includes('supabase.co')
+}
+
+/** После https:// в «хост» попал ключ, а не project ref. */
+function hostnameLooksLikeApiKey(host: string): boolean {
+  const h = host.toLowerCase()
+  return h.includes('publishable') || h.startsWith('sb_')
+}
+
 export type SupabaseEnvIssue =
   | 'ok'
   | 'missing'
   | 'postgres_string'
   | 'invalid_url'
   | 'missing_key'
+  | 'vars_swapped'
 
 export function getSupabaseEnv(): {
   url: string
@@ -78,8 +100,18 @@ export function getSupabaseEnv(): {
   const rawUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined
   const rawKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
 
+  const rawUrlStripped = rawUrl != null && typeof rawUrl === 'string' ? stripQuotes(rawUrl) : ''
+  const rawKeyStripped = rawKey != null && typeof rawKey === 'string' ? stripQuotes(rawKey) : ''
+
+  if (rawUrlStripped && rawStringLooksLikeApiKey(rawUrlStripped)) {
+    return { url: '', anonKey: rawKeyStripped, ok: false, issue: 'vars_swapped' }
+  }
+  if (rawKeyStripped && looksLikeProjectHttpsUrl(rawKeyStripped)) {
+    return { url: '', anonKey: rawKeyStripped, ok: false, issue: 'vars_swapped' }
+  }
+
   const { url: normalizedUrl, error: normErr } = normalizeSupabaseApiUrl(rawUrl)
-  const anonKey = rawKey != null && typeof rawKey === 'string' ? stripQuotes(rawKey) : ''
+  const anonKey = rawKeyStripped
 
   if (normErr === 'postgres_string') {
     return { url: '', anonKey, ok: false, issue: 'postgres_string' }
@@ -90,6 +122,15 @@ export function getSupabaseEnv(): {
     return { url, anonKey, ok: false, issue: 'missing_key' }
   }
   if (!url || !isValidHttpUrl(url)) {
+    return { url, anonKey, ok: false, issue: 'invalid_url' }
+  }
+
+  try {
+    const host = new URL(url).hostname
+    if (hostnameLooksLikeApiKey(host)) {
+      return { url, anonKey, ok: false, issue: 'vars_swapped' }
+    }
+  } catch {
     return { url, anonKey, ok: false, issue: 'invalid_url' }
   }
 

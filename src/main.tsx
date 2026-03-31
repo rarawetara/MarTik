@@ -24,6 +24,9 @@ function EnvMissingScreen() {
       {issue === 'postgres_string' && (
         <p style={{ color: '#b42318', marginBottom: 16, fontWeight: 600 }}>{ru.envWrongPostgresUrl}</p>
       )}
+      {issue === 'vars_swapped' && (
+        <p style={{ color: '#b42318', marginBottom: 16, fontWeight: 600 }}>{ru.envVarsSwapped}</p>
+      )}
       <p style={{ color: '#444', marginBottom: 12 }}>{ru.envMissingBody}</p>
       <p style={{ color: '#444', marginBottom: 12 }}>{ru.envMissingVars}</p>
       <p style={{ color: '#666', fontSize: 14 }}>{ru.envMissingLocal}</p>

@@ -13,6 +13,8 @@ export const ru = {
   envMissingLocal: 'Локально создайте файл .env в корне проекта (см. .env.example).',
   envWrongPostgresUrl:
     'Похоже, в VITE_SUPABASE_URL попала строка подключения к базе (postgresql://… или порт :5432). В браузере нужна другая ссылка: Supabase → Project Settings → API → скопируйте Project URL — вид https://xxxx.supabase.co (без db. и без :5432).',
+  envVarsSwapped:
+    'Перепутаны переменные: в VITE_SUPABASE_URL должна быть только ссылка вида https://xxxx.supabase.co (Project URL). В VITE_SUPABASE_ANON_KEY — только ключ sb_publishable_... (Publishable key). Поменяйте местами в Netlify, сохраните и сделайте новый деплой.',
 
   // Auth
   login: 'Войти',
