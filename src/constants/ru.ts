@@ -8,7 +8,8 @@ export const ru = {
   envMissingTitle: 'Не заданы переменные Supabase',
   envMissingBody:
     'В панели хостинга (Vercel, Netlify, Cloudflare Pages, GitHub Actions и т.д.) добавьте переменные окружения и пересоберите проект.',
-  envMissingVars: 'Нужны: VITE_SUPABASE_URL и VITE_SUPABASE_ANON_KEY (Supabase → Project Settings → API).',
+  envMissingVars:
+    'Нужны: VITE_SUPABASE_URL (полная ссылка вида https://xxxx.supabase.co) и VITE_SUPABASE_ANON_KEY (ключ anon). Supabase → Project Settings → API.',
   envMissingLocal: 'Локально создайте файл .env в корне проекта (см. .env.example).',
 
   // Auth

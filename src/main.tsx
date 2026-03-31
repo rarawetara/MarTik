@@ -1,11 +1,11 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ru } from './constants/ru'
+import { getSupabaseEnv } from './lib/supabaseEnv'
 import './index.css'
 import './design-system.css'
 
-const url = import.meta.env.VITE_SUPABASE_URL
-const key = import.meta.env.VITE_SUPABASE_ANON_KEY
+const { ok } = getSupabaseEnv()
 
 function EnvMissingScreen() {
   return (
@@ -28,7 +28,7 @@ function EnvMissingScreen() {
   )
 }
 
-if (!url || !key) {
+if (!ok) {
   createRoot(document.getElementById('root')!).render(<EnvMissingScreen />)
 } else {
   void import('./App').then(({ default: App }) => {
