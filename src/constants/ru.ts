@@ -27,6 +27,8 @@ export const ru = {
   signUpError: 'Ошибка регистрации.',
   signupSuccessConfirmEmail: 'Регистрация прошла успешно. Подтвердите email по ссылке из письма.',
   errorEmailNotConfirmed: 'Сначала подтвердите email по ссылке из письма (проверьте «Спам»).',
+  errorInvalidApiKey:
+    'Ошибка 401: неверный ключ API. В Netlify в VITE_SUPABASE_ANON_KEY вставьте anon public ключ из Supabase → Settings → API (длинная строка, обычно начинается с eyJ…). Не используйте service_role и не путайте с паролем от базы.',
   errorUserExists: 'Этот email уже зарегистрирован.',
   errorRateLimit: 'Слишком много попыток. Попробуйте позже.',
   errorInvalidLogin: 'Неверный email или пароль.',

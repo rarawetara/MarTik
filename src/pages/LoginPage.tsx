@@ -6,6 +6,8 @@ type Mode = 'login' | 'signup'
 
 function mapAuthError(message: string): string {
   const m = message.toLowerCase()
+  if (m.includes('invalid api key') || m.includes('jwt') && m.includes('invalid')) return ru.errorInvalidApiKey
+  if (m.includes('401')) return ru.errorInvalidApiKey
   if (m.includes('already') && (m.includes('registered') || m.includes('exists'))) return ru.errorUserExists
   if (m.includes('rate') || m.includes('429') || m.includes('too many')) return ru.errorRateLimit
   if (m.includes('not confirmed') || m.includes('email_not_confirmed')) return ru.errorEmailNotConfirmed
@@ -33,9 +35,9 @@ export function LoginPage() {
     }
     setLoading(true)
     try {
-      if (mode === 'login') {
+        if (mode === 'login') {
         const { error: err } = await supabase.auth.signInWithPassword({ email, password })
-        if (err) setError(mapAuthError(err.message))
+        if (err) setError(mapAuthError(`${err.message} ${err.status ?? ''}`))
       } else {
         const redirectTo =
           typeof window !== 'undefined' ? `${window.location.origin}/` : undefined
@@ -45,7 +47,7 @@ export function LoginPage() {
           options: redirectTo ? { emailRedirectTo: redirectTo } : undefined,
         })
         if (err) {
-          setError(mapAuthError(err.message))
+          setError(mapAuthError(`${err.message} ${err.status ?? ''}`))
           return
         }
         if (data?.user) {
@@ -73,11 +75,12 @@ export function LoginPage() {
             <label htmlFor="email">{ru.email}</label>
             <input
               id="email"
+              name="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              autoComplete="email"
+              autoComplete={mode === 'login' ? 'username' : 'email'}
             />
           </div>
           <div className="form-group">
