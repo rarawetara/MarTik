@@ -13,6 +13,7 @@ import { PlannedByDate } from './pages/PlannedByDate'
 import { Diary } from './pages/Diary'
 import { Outlet } from 'react-router-dom'
 import { Settings } from './pages/Settings'
+import { Wishlist } from './pages/Wishlist'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -44,6 +45,7 @@ export default function App() {
           <Route index element={<Home />} />
           <Route path="today" element={<Today />} />
           <Route path="beauty" element={<Beauty />} />
+          <Route path="wishlist" element={<Wishlist />} />
           <Route path="wardrobe" element={<Outlet />}>
             <Route index element={<Wardrobe />} />
             <Route path="outfits" element={<OutfitList />} />

@@ -1,6 +1,7 @@
 import { Pencil, Trash2 } from 'lucide-react'
 import type { BeautyProduct } from '../../lib/supabase'
 import { ru } from '../../constants/ru'
+import { PRODUCT_RATING_ROWS } from '../../constants/productRatings'
 
 const AREA_LABELS: Record<string, string> = {
   face: ru.productAreaFace,
@@ -14,6 +15,16 @@ const TIME_LABELS: Record<string, string> = {
   anytime: ru.productTimeAnytime,
 }
 
+function MiniStars({ value }: { value: number }) {
+  return (
+    <span className="product-card-stars" aria-label={`${value} из 5`}>
+      {[1, 2, 3, 4, 5].map((s) => (
+        <span key={s} className={`product-card-stars__dot${s <= value ? ' product-card-stars__dot--on' : ''}`} />
+      ))}
+    </span>
+  )
+}
+
 type Props = {
   product: BeautyProduct
   onEdit: (product: BeautyProduct) => void
@@ -21,9 +32,13 @@ type Props = {
 }
 
 export function BeautyProductCard({ product, onEdit, onDelete }: Props) {
-  const meta = [product.category, AREA_LABELS[product.area ?? ''], TIME_LABELS[product.time_of_day ?? '']]
+  const categoryDisplay =
+    product.category === 'household' ? ru.productCategoryHousehold : product.category
+  const meta = [categoryDisplay, AREA_LABELS[product.area ?? ''], TIME_LABELS[product.time_of_day ?? '']]
     .filter(Boolean)
     .join(' · ')
+
+  const hasRatings = PRODUCT_RATING_ROWS.some(({ key }) => product[key] != null)
 
   return (
     <article className="catalog-card" onClick={() => onEdit(product)}>
@@ -38,6 +53,25 @@ export function BeautyProductCard({ product, onEdit, onDelete }: Props) {
       <div className="catalog-card__body">
         <h3 className="catalog-card__name">{product.name}</h3>
         {meta && <p className="catalog-card__meta">{meta}</p>}
+
+        {product.price != null && (
+          <p className="product-card-price">
+            {product.price.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+          </p>
+        )}
+
+        {hasRatings && (
+          <div className="product-card-ratings">
+            {PRODUCT_RATING_ROWS.map(({ key, label }) =>
+              product[key] != null ? (
+                <div key={key} className="product-card-rating-row">
+                  <span className="product-card-rating-row__label">{label}</span>
+                  <MiniStars value={product[key] as number} />
+                </div>
+              ) : null
+            )}
+          </div>
+        )}
       </div>
 
       <div className="catalog-card__actions">

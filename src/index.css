@@ -5,51 +5,52 @@
 }
 
 :root {
-  --color-black: #111111;
-  /* Pure B&W palette */
-  --color-pink: #111111;
-  --color-pink-dark: #111111;
-  --color-pink-line: #c8c8c8;
-  --color-pink-surface: rgba(0, 0, 0, 0.04);
-  --color-pink-surface-mid: rgba(0, 0, 0, 0.04);
-  --color-pink-gradient-end: rgba(0, 0, 0, 0.04);
+  /* ── mirrors design-system.css ── */
+  --color-black:              #1C1C1A;
+  --color-white:              #ffffff;
+  --color-gray:               #E5E7EB;
+  --color-pink:               #111111;
+  --color-pink-dark:          #000000;
+  --color-pink-line:          #E5E7EB;
+  --color-pink-surface:       #F9FAFB;
+  --color-pink-surface-mid:   #F3F4F6;
+  --color-pink-gradient-end:  #F9FAFB;
   --color-pink-gradient-deep: #111111;
-  --color-pink-hover-fill: rgba(0, 0, 0, 0.06);
-  --color-pink-hover: #333333;
-  --color-pink-muted-text: #888888;
-  --color-gray: #c8c8c8;
-  --color-white: #ffffff;
+  --color-pink-hover-fill:    rgba(0,0,0,0.04);
+  --color-pink-hover:         #222222;
+  --color-pink-muted-text:    #6B7280;
 
   --font-heading: 'Zen Kurenaido', system-ui, sans-serif;
-  --font-accent: 'Zen Kurenaido', system-ui, sans-serif;
-  --font-body: 'Zen Kurenaido', system-ui, sans-serif;
+  --font-accent:  'Zen Kurenaido', system-ui, sans-serif;
+  --font-body:    'Zen Kurenaido', system-ui, sans-serif;
 
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 16px;
-  --radius-xl: 16px;
-  --radius-pill: 10px;
-  --shadow-xs: none;
-  --shadow-sm: none;
-  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.12);
-  --shadow-card-hover: 0 4px 20px rgba(0, 0, 0, 0.12);
-  --shadow-nav: none;
+  --radius-sm:   8px;
+  --radius-md:   10px;
+  --radius-lg:   16px;
+  --radius-xl:   20px;
+  --radius-pill: 20px;
+
+  --shadow-xs:         none;
+  --shadow-sm:         0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:         0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-card-hover: 0 6px 20px rgba(0,0,0,0.08);
+  --shadow-nav:        none;
   --shadow-inset-soft: none;
+
   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-spring: cubic-bezier(0.34, 1.3, 0.64, 1);
-  --text-secondary: #888888;
-  --text-tertiary: #bbbbbb;
-  --border-subtle: #c8c8c8;
-  --border-strong: #888888;
-  --focus-ring: 0 0 0 2px rgba(17, 17, 17, 0.2);
 
-  font-size: 24px;
+  --text-secondary: #4B5563;
+  --text-tertiary:  #6B7280;
+  --border-subtle:  #E5E7EB;
+  --border-strong:  #D1D5DB;
+  --focus-ring: 0 0 0 3px rgba(17, 24, 39, 0.12);
+
+  font-size: 16px;
   font-family: var(--font-body);
-  line-height: 1.65;
-  letter-spacing: -0.01em;
-  color: var(--color-black);
-  background-color: #ffffff;
-  background-image: none;
+  line-height: 1.5;
+  color: #1C1C1A;
+  background-color: #FFFFFF;
 }
 
 body {
@@ -60,15 +61,15 @@ body {
 }
 
 p {
-  font-size: 30px;
-  line-height: 1.7;
+  font-size: 14px;
+  line-height: 1.5;
   margin: 0 0 0.5em;
   color: var(--text-primary);
 }
 
 small, .text-sm {
-  font-size: 20px;
-  line-height: 1.5;
+  font-size: 14px;
+  line-height: 1.4;
 }
 
 #root {
@@ -209,7 +210,7 @@ a {
 .card h3 {
   margin: 0 0 10px;
   font-family: var(--font-body);
-  font-size: 30px;
+  font-size: 20px;
   font-weight: 600;
   letter-spacing: 0;
   color: var(--color-black);
@@ -228,14 +229,14 @@ a {
 .link-text {
   color: var(--color-pink-muted-text);
   font-weight: 400;
-  font-size: 27px;
+  font-size: 18px;
   text-decoration: none;
   border-bottom: none;
   transition: color 0.18s ease;
 }
 
 .link-text:hover {
-  color: #111111;
+  color: var(--accent);
   text-decoration: underline;
 }
 
@@ -293,7 +294,7 @@ a {
   margin: 0;
   border: none;
   background: none;
-  color: #111111;
+  color: var(--accent);
   font-weight: 600;
   font-size: inherit;
   font-family: inherit;
@@ -304,7 +305,7 @@ a {
 }
 
 .btn-link-inline:hover {
-  color: #111111;
+  color: var(--accent);
 }
 
 .form-error {
@@ -323,7 +324,7 @@ a {
   padding: 12px 14px;
   font-size: 0.875rem;
   line-height: 1.45;
-  color: #111111;
+  color: var(--accent);
   background: var(--bg-subtle);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
@@ -354,7 +355,7 @@ select.outfit-slot-select,
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   background-color: rgba(255, 255, 255, 0.96);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23111111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%234c7360' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
   background-size: 18px;
@@ -385,7 +386,7 @@ select.wardrobe-filter:focus,
 select.outfit-slot-select:focus,
 .form-group select:not([multiple]):not([size]):focus {
   outline: none;
-  border-color: #111111;
+  border-color: var(--accent);
   box-shadow: var(--focus-ring);
 }
 
@@ -492,7 +493,7 @@ button:focus-visible,
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(180deg, #d0d0d0 0%, #111111 100%);
+  background: linear-gradient(180deg, rgba(76, 115, 96, 0.4) 0%, var(--accent) 100%);
   transition: height 0.3s ease;
 }
 
@@ -521,8 +522,8 @@ button:focus-visible,
 
 .mood-options button.selected {
   background: rgba(0, 0, 0, 0.05);
-  border-color: #111111;
-  color: #111111;
+  border-color: var(--accent);
+  color: var(--accent);
   box-shadow: var(--shadow-xs);
 }
 
@@ -552,7 +553,7 @@ button:focus-visible,
 
 .task-item__title {
   flex: 1;
-  font-size: 26px;
+  font-size: 17px;
   display: flex;
   align-items: center;
   gap: 5px;
@@ -573,7 +574,7 @@ button:focus-visible,
 }
 
 .task-templates-panel__label {
-  font-size: 20px;
+  font-size: 13px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -607,18 +608,18 @@ button:focus-visible,
 }
 
 .task-template-item__toggle.active {
-  background: #111111;
-  border-color: #111111;
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
 .task-template-item__title {
   flex: 1;
-  font-size: 24px;
+  font-size: 16px;
   color: var(--text-primary);
 }
 
 .task-template-item__freq {
-  font-size: 20px;
+  font-size: 13px;
   color: var(--text-muted);
   white-space: nowrap;
 }
@@ -627,7 +628,7 @@ button:focus-visible,
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 21px;
+  font-size: 14px;
   color: var(--text-muted);
   background: none;
   border: none;
@@ -636,7 +637,7 @@ button:focus-visible,
   transition: color var(--ease);
 }
 
-.task-templates-panel__add-btn:hover { color: #111111; }
+.task-templates-panel__add-btn:hover { color: var(--accent); }
 
 .task-template-form {
   display: flex;
@@ -657,7 +658,7 @@ button:focus-visible,
   border-radius: 6px;
   border: 1px solid var(--line);
   background: transparent;
-  font-size: 20px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-muted);
   cursor: pointer;
@@ -665,9 +666,9 @@ button:focus-visible,
 }
 
 .task-template-day.active {
-  background: #111111;
+  background: var(--accent);
   color: #ffffff;
-  border-color: #111111;
+  border-color: var(--accent);
 }
 
 .task-list-add {
@@ -695,7 +696,7 @@ button:focus-visible,
 
 .task-list-add__input:focus {
   outline: none;
-  border-color: #111111;
+  border-color: var(--accent);
   box-shadow: var(--focus-ring);
 }
 
@@ -711,7 +712,7 @@ button:focus-visible,
 }
 
 .btn-primary {
-  background: #111111;
+  background: var(--accent);
   color: #fff;
   border: none;
   padding: 11px 20px;
@@ -747,7 +748,7 @@ button:focus-visible,
   padding: 9px 14px;
   border-radius: var(--radius-md);
   font-weight: 500;
-  color: #111111;
+  color: var(--accent);
   transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
@@ -786,7 +787,7 @@ button:focus-visible,
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #111111;
+  border-color: var(--accent);
   box-shadow: var(--focus-ring);
 }
 
@@ -840,7 +841,7 @@ button:focus-visible,
   background: #ffffff;
   font-size: 1.1rem;
   line-height: 1;
-  color: #111111;
+  color: var(--accent);
   transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
 }
 
@@ -923,13 +924,13 @@ button:focus-visible,
 }
 
 .beauty-tabs__tab:hover {
-  color: #111111;
+  color: var(--accent);
   background: rgba(255, 255, 255, 0.55);
 }
 
 .beauty-tabs__tab--active {
   background: #fff;
-  color: #111111;
+  color: var(--accent);
   font-weight: 600;
   box-shadow: var(--shadow-xs);
 }
@@ -975,7 +976,7 @@ button:focus-visible,
 }
 
 .beauty-product-card:hover {
-  border-color: #111111;
+  border-color: var(--accent);
 }
 
 .beauty-product-card__image-wrap {
@@ -1006,7 +1007,7 @@ button:focus-visible,
   margin: 0 0 4px;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #111111;
+  color: var(--accent);
   line-height: 1.3;
 }
 
@@ -1044,7 +1045,7 @@ button:focus-visible,
 
 .beauty-product-card__btn--edit:hover {
   background: var(--bg-subtle);
-  color: #111111;
+  color: var(--accent);
 }
 
 .beauty-product-card__btn--delete {
@@ -1053,7 +1054,7 @@ button:focus-visible,
 
 .beauty-product-card__btn--delete:hover {
   background: rgba(0, 0, 0, 0.06);
-  color: #111111;
+  color: var(--accent);
 }
 
 .beauty-product-form-overlay {
@@ -1170,7 +1171,7 @@ button:focus-visible,
 }
 
 .wardrobe-select-hint {
-  font-size: 27px;
+  font-size: 18px;
   color: var(--text-muted);
   align-self: center;
 }
@@ -1232,7 +1233,7 @@ button:focus-visible,
   margin: 0 0 4px;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #111111;
+  color: var(--accent);
   line-height: 1.3;
 }
 
@@ -1260,7 +1261,7 @@ button:focus-visible,
 }
 
 .wardrobe-item-card__btn--edit {
-  color: #111111;
+  color: var(--accent);
   border-color: var(--line);
   background: var(--bg-subtle);
 }
@@ -1366,7 +1367,7 @@ button:focus-visible,
   display: inline-block;
   margin-bottom: 8px;
   font-size: 0.9rem;
-  color: #111111;
+  color: var(--accent);
   text-decoration: none;
 }
 
@@ -1402,7 +1403,7 @@ button:focus-visible,
 
 .outfit-list-by-date {
   text-decoration: none;
-  color: #111111;
+  color: var(--accent);
   font-size: 0.9rem;
   padding: 6px 12px;
   border-radius: 8px;
@@ -1478,7 +1479,7 @@ button:focus-visible,
 }
 
 .outfit-builder-success {
-  color: #111111;
+  color: var(--accent);
   font-family: var(--font-accent);
   font-size: 1rem;
   margin: 12px 0 0;
@@ -1709,7 +1710,7 @@ button:focus-visible,
 }
 
 .outfit-card__btn--edit {
-  color: #111111;
+  color: var(--accent);
   border-color: rgba(0, 0, 0, 0.14);
   background: rgba(0, 0, 0, 0.04);
 }
@@ -1719,7 +1720,7 @@ button:focus-visible,
 }
 
 .outfit-card__btn--plan {
-  color: #111111;
+  color: var(--accent);
   border-color: rgba(0, 0, 0, 0.14);
   background: rgba(0, 0, 0, 0.04);
 }
@@ -1800,7 +1801,7 @@ button:focus-visible,
   margin-bottom: 8px;
   font-size: 0.9rem;
   font-weight: 500;
-  color: #111111;
+  color: var(--accent);
 }
 
 .plan-outfit-modal-input {
@@ -1817,7 +1818,7 @@ button:focus-visible,
   margin: 0 0 20px;
   font-size: 1.05rem;
   font-weight: 500;
-  color: #111111;
+  color: var(--accent);
 }
 
 .plan-outfit-modal-already {
@@ -1826,7 +1827,7 @@ button:focus-visible,
   background: var(--bg-subtle);
   border-radius: 8px;
   font-size: 0.875rem;
-  color: #111111;
+  color: var(--accent);
 }
 
 .plan-outfit-modal-error {
@@ -1848,7 +1849,7 @@ button:focus-visible,
   margin-bottom: 16px;
   font-size: 0.95rem;
   font-weight: 500;
-  color: #111111;
+  color: var(--accent);
 }
 
 .planned-by-date-input {
@@ -1876,7 +1877,7 @@ button:focus-visible,
   margin: 0 0 12px;
   font-size: 1rem;
   font-weight: 600;
-  color: #111111;
+  color: var(--accent);
 }
 
 .planned-by-date-result-date {
@@ -1899,7 +1900,7 @@ button:focus-visible,
 }
 
 .planned-by-date-btn--replace {
-  color: #111111;
+  color: var(--accent);
   border: 1px solid var(--color-pink-line);
   background: var(--bg-subtle);
 }
@@ -1914,7 +1915,7 @@ button:focus-visible,
   padding: 10px 14px;
   background: var(--bg-subtle);
   border-radius: 8px;
-  color: #111111;
+  color: var(--accent);
   font-size: 0.95rem;
 }
 
@@ -1975,7 +1976,7 @@ button:focus-visible,
   cursor: pointer;
   font: inherit;
   font-size: 0.8rem;
-  color: #111111;
+  color: var(--accent);
 }
 
 .planned-week-day:hover {
@@ -1986,7 +1987,7 @@ button:focus-visible,
 .planned-week-day--selected {
   background: var(--bg-subtle);
   border-color: var(--line);
-  color: #111111;
+  color: var(--accent);
   font-weight: 600;
 }
 
@@ -2029,7 +2030,7 @@ button:focus-visible,
 }
 
 .beauty-routine-card:hover {
-  border-color: #111111;
+  border-color: var(--accent);
 }
 
 .beauty-routine-card__header {
@@ -2043,7 +2044,7 @@ button:focus-visible,
   margin: 0;
   font-size: 1.1rem;
   font-weight: 600;
-  color: #111111;
+  color: var(--accent);
 }
 
 .beauty-routine-card__type {
@@ -2051,7 +2052,7 @@ button:focus-visible,
   padding: 4px 8px;
   border-radius: 6px;
   background: var(--bg-subtle);
-  color: #111111;
+  color: var(--accent);
 }
 
 .beauty-routine-card__steps {
@@ -2066,7 +2067,7 @@ button:focus-visible,
   gap: 8px;
   padding: 6px 0;
   font-size: 0.9rem;
-  color: #111111;
+  color: var(--accent);
 }
 
 .beauty-routine-card__step--empty {
@@ -2106,7 +2107,7 @@ button:focus-visible,
 
 .beauty-routine-card__btn--edit:hover {
   background: var(--bg-subtle);
-  color: #111111;
+  color: var(--accent);
 }
 
 .beauty-routine-card__btn--delete {
@@ -2115,7 +2116,7 @@ button:focus-visible,
 
 .beauty-routine-card__btn--delete:hover {
   background: rgba(0, 0, 0, 0.06);
-  color: #111111;
+  color: var(--accent);
 }
 
 .beauty-routine-form__steps {
@@ -2272,7 +2273,7 @@ button:focus-visible,
 
 .beauty-picker__name {
   font-size: 0.9rem;
-  color: #111111;
+  color: var(--accent);
 }
 
 /* Beauty on Today (Phase 2C) */
@@ -2302,7 +2303,7 @@ button:focus-visible,
   margin: 0 0 8px;
   font-size: 1rem;
   font-weight: 600;
-  color: #111111;
+  color: var(--accent);
 }
 
 .beauty-today-steps {
@@ -2330,7 +2331,7 @@ button:focus-visible,
 }
 
 .beauty-today-step-name {
-  color: #111111;
+  color: var(--accent);
 }
 
 .beauty-today-step-name--done {
@@ -2395,7 +2396,7 @@ button:focus-visible,
 
 .beauty-progress-card__area {
   background: var(--color-pink-surface-mid);
-  color: #111111;
+  color: var(--accent);
   padding: 2px 8px;
   border-radius: 6px;
 }
@@ -2447,9 +2448,9 @@ button:focus-visible,
 }
 
 .beauty-progress-rating-btn--active {
-  border-color: #111111;
+  border-color: var(--accent);
   background: var(--color-pink-surface-mid);
-  color: #111111;
+  color: var(--accent);
 }
 
 .beauty-progress-card__actions {
@@ -2477,7 +2478,7 @@ button:focus-visible,
 
 .beauty-progress-card__edit:hover {
   background: var(--bg-subtle);
-  color: #111111;
+  color: var(--accent);
 }
 
 .beauty-progress-card__delete {
@@ -2486,7 +2487,7 @@ button:focus-visible,
 
 .beauty-progress-card__delete:hover {
   background: rgba(0, 0, 0, 0.06);
-  color: #111111;
+  color: var(--accent);
 }
 
 /* -------------------------------------------------------------------
@@ -2546,7 +2547,7 @@ button:focus-visible,
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: #111111;
+  background: var(--accent);
   color: #fff;
   display: flex;
   align-items: center;
@@ -2649,8 +2650,8 @@ button:focus-visible,
 }
 
 .wardrobe-item-card--selected {
-  border-color: #111111 !important;
-  box-shadow: 0 0 0 2px #111111 !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 2px var(--accent) !important;
 }
 
 .wardrobe-item-card__check {
@@ -2665,16 +2666,16 @@ button:focus-visible,
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 27px;
+  font-size: 18px;
   font-weight: 700;
-  color: #111111;
+  color: var(--accent);
   z-index: 3;
   transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .wardrobe-item-card__check--active {
-  background: #111111;
-  border-color: #111111;
+  background: var(--accent);
+  border-color: var(--accent);
   color: #ffffff;
 }
 
@@ -2869,7 +2870,7 @@ button:focus-visible,
 }
 
 .login-form-neo .form-group input:focus {
-  border-color: #111111;
+  border-color: var(--accent);
   box-shadow: 4px 4px 0 rgba(17, 17, 17, 0.15);
 }
 
@@ -2904,95 +2905,217 @@ button:focus-visible,
    TASK LIST — категории, фильтр, inline edit
    ═══════════════════════════════════════════════════ */
 
-.task-list-header { display: flex; align-items: center; margin-bottom: 12px; }
-.task-list-header__actions { display: flex; gap: 4px; margin-left: auto; }
-
-/* Category filter pills */
-.task-cat-filter {
+/* Header */
+.tl-header {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  align-items: center;
   margin-bottom: 10px;
 }
+.tl-repeat-btn { margin-left: auto; }
 
-.task-cat-pill {
-  padding: 3px 11px;
-  font-size: 13px;
-  border: 1px solid var(--line);
+/* ── Category filter row ── */
+.tl-cats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.tl-cat-pill-wrap { position: relative; }
+
+.tl-cat-pill {
+  padding: 4px 12px;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  border: 0.5px solid var(--color-border-primary);
   border-radius: 20px;
   background: transparent;
-  color: var(--text-muted);
+  color: var(--color-text-secondary);
   cursor: pointer;
   transition: background var(--ease), color var(--ease), border-color var(--ease);
   line-height: 1.4;
+  user-select: none;
+  -webkit-user-select: none;
 }
-.task-cat-pill.active,
-.task-cat-pill:hover {
-  background: var(--text-primary);
-  color: var(--bg-card);
-  border-color: var(--text-primary);
+.tl-cat-pill--active,
+.tl-cat-pill:hover {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
 }
 
-/* Category manager */
-.task-cat-mgr {
-  border: 1px solid var(--line);
-  border-radius: var(--radius-card);
-  padding: 12px;
-  margin-bottom: 10px;
-  background: var(--bg-subtle);
-}
-.task-cat-mgr__list {
+/* Delete confirmation */
+.tl-cat-confirm {
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 10px;
-}
-.task-cat-mgr__item {
-  display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 13px;
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  padding: 3px 9px;
-  background: var(--bg-card);
+  gap: 2px;
 }
-.task-cat-mgr__remove {
+.tl-cat-confirm__btn {
   border: none;
   background: none;
-  color: var(--text-muted);
+  color: var(--color-text-secondary);
+  font-size: 10px;
   cursor: pointer;
-  font-size: 11px;
-  padding: 0;
-  line-height: 1;
+  padding: 0 2px;
+  text-decoration: underline;
 }
-.task-cat-mgr__remove:hover { color: var(--text-primary); }
-.task-cat-mgr__add { display: flex; gap: 6px; }
+.tl-cat-confirm__btn:hover { color: var(--color-text-primary); }
 
-/* Add form with category */
-.task-list-add { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
-.task-list-add__input { flex: 1; min-width: 0; }
-.task-list-add__cat { width: 90px; flex-shrink: 0; font-size: 13px; }
+/* Add category button */
+.tl-cat-add-btn {
+  width: 28px;
+  height: 28px;
+  border: 0.5px solid var(--color-border-primary);
+  border-radius: 50%;
+  background: transparent;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color var(--ease), color var(--ease);
+}
+.tl-cat-add-btn:hover { border-color: var(--color-text-primary); color: var(--color-text-primary); }
 
-/* Inline edit input */
-.task-item__edit-input {
-  flex: 1;
-  border: 1px solid var(--text-primary);
-  border-radius: 6px;
-  padding: 3px 8px;
+/* Category inline input */
+.tl-cat-input {
+  border: none;
+  border-bottom: 1px solid var(--color-text-primary);
+  font-size: 10px;
+  padding: 2px 4px;
+  width: 110px;
+  background: transparent;
+  color: var(--color-text-primary);
   font-family: var(--font-body);
-  font-size: 15px;
-  color: var(--text-primary);
+  outline: none;
+}
+
+/* ── Add task form ── */
+.tl-add-form { margin-bottom: 10px; }
+
+.tl-add-form__row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.task-list-add__input {
+  flex: 1;
+  min-width: 0;
+  height: 38px;
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-md);
+  padding: 0 10px;
+  font-family: var(--font-body);
+  font-size: 10px;
+  color: var(--color-text-primary);
   background: transparent;
   outline: none;
-  min-width: 0;
+  transition: border-color var(--ease);
+}
+.task-list-add__input:focus { border-color: var(--color-text-primary); }
+
+.tl-add-cat-select {
+  height: 32px;
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-md);
+  font-size: 10px;
+  padding: 0 8px;
+  color: var(--color-text-secondary);
+  background: var(--color-background-primary);
+  min-width: 120px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  outline: none;
 }
 
-/* Inline edit button */
+/* Persistent toggle */
+.tl-persistent-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+.tl-persistent-toggle input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  border: 0.5px solid var(--color-border-primary);
+  border-radius: 2px;
+  cursor: pointer;
+  accent-color: var(--color-text-primary);
+}
+
+/* ── Inline edit ── */
+.task-item--editing {
+  flex-wrap: wrap;
+  align-items: flex-start;
+  padding: 10px 12px;
+  background: var(--bg-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.task-item__edit-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.task-item__edit-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  outline: none;
+  transition: border-color var(--ease);
+}
+.task-item__edit-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(229,119,165,0.15);
+}
+
+.task-item__edit-cat {
+  width: 100%;
+  box-sizing: border-box;
+  height: 34px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 0 10px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  outline: none;
+  cursor: pointer;
+  transition: border-color var(--ease);
+}
+.task-item__edit-cat:focus { border-color: var(--accent); }
+
+.task-item__edit-actions {
+  display: flex;
+  gap: 8px;
+}
+
 .task-item__edit-btn {
   border: none;
   background: none;
-  color: var(--text-light);
+  color: var(--text-muted);
   cursor: pointer;
   padding: 2px 4px;
   opacity: 0;
@@ -3003,29 +3126,280 @@ button:focus-visible,
 .task-item:hover .task-item__edit-btn { opacity: 1; }
 .task-item__edit-btn:hover { color: var(--text-primary); }
 
-/* Category inline select on task row */
-.task-item__cat-select {
-  font-size: 12px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 2px 5px;
-  background: transparent;
-  color: var(--text-muted);
-  max-width: 80px;
-  opacity: 0;
-  transition: opacity var(--ease);
+/* ── Persistent icon ── */
+.task-item__persistent-icon {
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+  margin-right: 4px;
 }
-.task-item:hover .task-item__cat-select { opacity: 1; }
 
-/* Category badge on task */
+/* ── Category badge on task ── */
 .task-item__cat-badge {
   display: inline-block;
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  border: 0.5px solid var(--line);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: 3px;
+  padding: 1px 6px;
+  color: var(--color-text-tertiary);
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+/* ── Carryover badge ── */
+.task-item__carryover-badge {
+  display: inline-block;
+  font-size: 10px;
+  letter-spacing: 0;
+  border: 0.5px solid var(--color-border-tertiary);
   border-radius: 3px;
   padding: 1px 5px;
-  color: var(--text-muted);
-  margin-left: 5px;
+  color: var(--color-text-tertiary);
+  margin-left: 6px;
   vertical-align: middle;
+  background: rgba(0, 0, 0, 0.03);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Header actions group ── */
+.tl-header-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ── Group by category button — matches catalog-card__btn ── */
+.tl-group-btn {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: background var(--ease), color var(--ease), border-color var(--ease);
+}
+.tl-group-btn:hover {
+  background: var(--bg-subtle);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.tl-group-btn--active {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+}
+.tl-group-btn--active:hover {
+  background: #333333;
+  border-color: #333333;
+}
+
+/* ── Category group in grouped view ── */
+.tl-groups { display: flex; flex-direction: column; }
+
+.tl-group { margin-bottom: 2px; }
+
+.tl-group-header {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-tertiary);
+  padding: 8px 0 4px;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+  margin-bottom: 2px;
+}
+
+/* ── Responsive: collapse category pills on very small screens ── */
+@media (max-width: 420px) {
+  .tl-cats { gap: 5px; }
+  .tl-cat-pill { padding: 3px 9px; font-size: 10px; }
+  .tl-add-form__row { flex-direction: column; }
+  .tl-add-form__row .btn-primary { align-self: flex-end; }
+}
+
+/* ═══════════════════════════════════════════════════
+   UX / UI IMPROVEMENTS
+   ═══════════════════════════════════════════════════ */
+
+/* ── Fix: tl-header title alignment in flex row ── */
+.tl-header .dashboard-card-title,
+.tl-header h3 {
+  margin-bottom: 0;
+}
+
+/* ── Task progress counter ── */
+.tl-progress {
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-tertiary);
+  margin-left: 8px;
+  letter-spacing: 0;
+  line-height: 1;
+  align-self: center;
+  flex-shrink: 0;
+}
+.tl-progress__sep { opacity: 0.4; margin: 0 1px; }
+
+/* ── Task completion animation ── */
+.task-item {
+  transition: opacity 0.22s ease;
+}
+.task-item.done {
+  opacity: 0.38;
+}
+.task-item.done .task-item__title {
+  text-decoration: line-through;
+  text-decoration-color: rgba(0, 0, 0, 0.3);
+  text-decoration-thickness: 1px;
+  transition: text-decoration 0.15s;
+}
+.task-item input[type="checkbox"] {
+  cursor: pointer;
+  transition: background 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease;
+}
+.task-item input[type="checkbox"]:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(17,17,17,0.08);
+}
+
+/* ── Button micro-interactions ── */
+.btn-primary {
+  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+}
+.btn-primary:active:not(:disabled) {
+  transform: scale(0.96);
+}
+.btn-primary:hover:not(:disabled) {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+
+/* ── Category pill smooth transition ── */
+.tl-cat-pill {
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+.tl-cat-pill:active { transform: scale(0.94); }
+
+/* ── Dashboard card — subtle enter animation (opacity only, no transform jank) ── */
+.dashboard-card, .card {
+  animation: card-enter 0.2s ease both;
+}
+@keyframes card-enter {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Empty state inside compact cards (task list) ── */
+.task-list-card .empty-state {
+  padding: 10px 0 6px;
+  text-align: left;
+  font-size: 10px;
+}
+
+/* ── Input focus polish ── */
+.task-list-add__input:focus,
+.tl-cat-input:focus,
+.today-journal-textarea:focus {
+  box-shadow: 0 0 0 2px rgba(17,17,17,0.1);
+  outline: none;
+}
+
+/* ── Nav link transition ── */
+.side-nav__link {
+  transition: background 0.15s ease, color 0.15s ease, padding-left 0.15s ease;
+}
+
+/* ═══════════════════════════════════════════════════
+   MOBILE BOTTOM NAVIGATION (< 600px)
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 599px) {
+  :root { --side-nav-width: 0px; }
+
+  .side-nav {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 58px;
+    flex-direction: row;
+    padding: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    border-right: none;
+    border-top: 1px solid var(--line);
+    justify-content: space-around;
+    align-items: center;
+    background: #ffffff;
+    z-index: 300;
+    overflow: visible;
+    gap: 0;
+  }
+
+  .side-nav__link {
+    flex-direction: column;
+    gap: 3px;
+    padding: 6px 8px 4px;
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+    border-left: none !important;
+    border-radius: 10px;
+    margin: 4px 2px;
+    font-size: 10px;
+  }
+
+  .side-nav__link--active {
+    border-left: none !important;
+    padding-left: 8px !important;
+    background: rgba(0,0,0,0.06) !important;
+  }
+
+  .side-nav__label {
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    clip: auto !important;
+    overflow: visible !important;
+    white-space: nowrap !important;
+    font-size: 10px !important;
+    letter-spacing: 0 !important;
+    line-height: 1.2 !important;
+  }
+
+  .side-nav__icon {
+    width: 22px !important;
+    height: 22px !important;
+  }
+
+  .app-shell__content {
+    margin-left: 0 !important;
+  }
+
+  .main {
+    padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px) + 16px) !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    padding-top: 24px !important;
+  }
+
+  /* Today grid → single column on mobile */
+  .page-today__grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  .page-today__panel--journal {
+    grid-column: span 1 !important;
+  }
+
+  /* Задачи — убрать лишние отступы */
+  .dashboard-card, .card {
+    padding: 16px !important;
+  }
 }

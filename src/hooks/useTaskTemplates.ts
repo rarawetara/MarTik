@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import type { TaskTemplate } from '../lib/supabase'
+import type { DailyTask, TaskTemplate } from '../lib/supabase'
 
 // Check if a template applies to a given date
 export function templateMatchesDate(template: TaskTemplate, date: Date): boolean {
@@ -111,5 +111,92 @@ export function useTaskTemplates(userId: string | undefined) {
     [userId, templates]
   )
 
-  return { templates, loading, addTemplate, deleteTemplate, toggleTemplate, applyTemplatesToEntry, fetchTemplates }
+  // Carry over uncompleted tasks from the previous day into the given entry
+  const carryOverFromPreviousDay = useCallback(
+    async (entryId: string, date: Date) => {
+      if (!userId) return
+
+      // Don't carry over into past dates (only today and future)
+      const localDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+      const todayLocal = (() => { const n = new Date(); return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}` })()
+      if (localDate < todayLocal) return
+
+      const yesterday = new Date(date)
+      yesterday.setDate(yesterday.getDate() - 1)
+      const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`
+
+      // Find yesterday's entry (search by both UTC and local date to be safe)
+      const { data: yesterdayEntries } = await supabase
+        .from('daily_entries')
+        .select('id, entry_date')
+        .eq('user_id', userId)
+        .gte('entry_date', yesterdayStr)
+        .lt('entry_date', localDate)
+        .order('entry_date', { ascending: false })
+        .limit(1)
+
+      const yesterdayEntry = yesterdayEntries?.[0]
+      if (!yesterdayEntry) return
+
+      // Get ALL uncompleted tasks from yesterday
+      const { data: uncompletedTasks } = await supabase
+        .from('daily_tasks')
+        .select('*')
+        .eq('daily_entry_id', yesterdayEntry.id)
+        .eq('completed', false)
+
+      if (!uncompletedTasks || uncompletedTasks.length === 0) return
+
+      // Exclude tasks whose template already matches today (they'll be re-created by applyTemplatesToEntry)
+      const tasksToCarryOver = (uncompletedTasks as DailyTask[]).filter((task) => {
+        if (!task.template_id) return true
+        const tpl = templates.find((t) => t.id === task.template_id)
+        if (!tpl) return true // template deleted — carry over
+        return !templateMatchesDate(tpl, date) // don't carry over if template fires today anyway
+      })
+
+      if (tasksToCarryOver.length === 0) return
+
+      // Deduplicate by title against today's existing tasks
+      const { data: todayTasks } = await supabase
+        .from('daily_tasks')
+        .select('title')
+        .eq('daily_entry_id', entryId)
+
+      const todayTitles = new Set((todayTasks ?? []).map((t: { title: string }) => t.title))
+      const toInsert = tasksToCarryOver.filter((t) => !todayTitles.has(t.title))
+
+      if (toInsert.length === 0) return
+
+      // Try with carried_over flag (requires migration supabase-migration-carryover.sql)
+      const { error } = await supabase.from('daily_tasks').insert(
+        toInsert.map((t, i) => ({
+          user_id: userId,
+          daily_entry_id: entryId,
+          title: t.title,
+          completed: false,
+          sort_order: 2000 + i,
+          category: t.category ?? null,
+          carried_over: true,
+        }))
+      )
+
+      // Fallback if column doesn't exist yet
+      if (error) {
+        await supabase.from('daily_tasks').insert(
+          toInsert.map((t, i) => ({
+            user_id: userId,
+            daily_entry_id: entryId,
+            title: t.title,
+            completed: false,
+            sort_order: 2000 + i,
+            category: t.category ?? null,
+          }))
+        )
+      }
+    },
+    [userId, templates]
+  )
+
+  return { templates, loading, addTemplate, deleteTemplate, toggleTemplate, applyTemplatesToEntry, carryOverFromPreviousDay, fetchTemplates }
 }

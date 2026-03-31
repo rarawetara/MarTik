@@ -42,8 +42,18 @@ export type DailyTask = {
   completed: boolean
   sort_order: number
   template_id: string | null
+  category?: string | null
+  carried_over?: boolean
   created_at: string
   updated_at: string
+}
+
+export type TaskCategory = {
+  id: string
+  user_id: string
+  name: string
+  sort_order: number
+  created_at: string
 }
 
 export type TaskTemplate = {
@@ -59,6 +69,17 @@ export type TaskTemplate = {
   updated_at: string
 }
 
+/** 1–5 star ratings on beauty products (null = not set). */
+export type BeautyProductRatings = {
+  rating_black_dots: number | null
+  rating_radiance: number | null
+  rating_firmness: number | null
+  rating_even_tone: number | null
+  rating_scent: number | null
+  rating_packaging: number | null
+  rating_appearance: number | null
+}
+
 export type BeautyProduct = {
   id: string
   user_id: string
@@ -68,6 +89,8 @@ export type BeautyProduct = {
   time_of_day: string | null
   notes: string | null
   image_url: string | null
+  price: number | null
+} & BeautyProductRatings & {
   sort_order: number
   created_at: string
   updated_at: string
@@ -78,6 +101,8 @@ export type BeautyRoutine = {
   user_id: string
   name: string
   type: string | null
+  /** 1–5, optional — overall satisfaction with the routine (column: run migration) */
+  rating?: number | null
   sort_order: number
   created_at: string
   updated_at: string
@@ -123,6 +148,50 @@ export type BeautyProgressPhoto = {
 
 export const PROGRESS_RATING_VALUES = ['low', 'medium', 'good', 'great'] as const
 export type ProgressRatingValue = (typeof PROGRESS_RATING_VALUES)[number]
+
+export type Vitamin = {
+  id: string
+  user_id: string
+  name: string
+  dosage: string | null
+  notes: string | null
+  is_active: boolean
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
+
+export type VitaminLog = {
+  id: string
+  user_id: string
+  vitamin_id: string
+  log_date: string   // YYYY-MM-DD
+  created_at: string
+}
+
+export const WISHLIST_TARGET_KINDS = ['cosmetics', 'clothing', 'vitamin', 'product'] as const
+export type WishlistTargetKind = (typeof WISHLIST_TARGET_KINDS)[number]
+
+/** Optional fields used when moving into the real catalog. */
+export type WishlistMeta = {
+  cosmetics?: { category?: string; area?: string; time_of_day?: string }
+  clothing?: { category?: string; color?: string; season?: string }
+  vitamin?: { dosage?: string }
+}
+
+export type WishlistItem = {
+  id: string
+  user_id: string
+  target_kind: WishlistTargetKind
+  name: string
+  notes: string | null
+  image_url: string | null
+  price: number | null
+  meta: WishlistMeta
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
 
 export const BEAUTY_PRODUCTS_BUCKET = 'beauty-products'
 export const BEAUTY_PROGRESS_BUCKET = 'beauty-progress'

@@ -6,7 +6,7 @@ import { WaterWidget } from '../components/WaterWidget'
 import { supabase } from '../lib/supabase'
 import { ru } from '../constants/ru'
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
-import type { Profile, Outfit, OutfitItem, WardrobeItem, BeautyRoutine, BeautyRoutineStep, DailyTask } from '../lib/supabase'
+import type { Profile, Outfit, OutfitItem, WardrobeItem, BeautyRoutine, BeautyRoutineStep } from '../lib/supabase'
 import { OUTFIT_SLOT_TYPES } from '../lib/supabase'
 import {
   DndContext, DragOverlay, useDraggable, useDroppable,
@@ -14,6 +14,9 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core'
 import { useWidgetLayout, type Side, type SlotPos, type WidgetId, SLOT_POSITIONS } from '../hooks/useWidgetLayout'
+import { VitaminMonthMicro } from '../components/Vitamins/VitaminMonthMicro'
+import { CareRoutineMonthMicro, type CareMonthCell } from '../components/Beauty/CareRoutineMonthMicro'
+import { isRoutineDue, deduplicateByTimeSlot } from '../lib/beautyRoutineDue'
 
 function WidgetSlot({ slotId, empty, isDraggingAny, children }: {
   slotId: string; empty: boolean; isDraggingAny: boolean; children?: ReactNode
@@ -49,26 +52,29 @@ type OutfitWithItems = Outfit & {
   items: (OutfitItem & { wardrobe_items: WardrobeItem | null })[]
 }
 
-type RoutineProgress = { name: string; completed: number; total: number }
+type RoutineProgress = { id: string; name: string; completed: number; total: number }
 
-function isRoutineDue(routine: BeautyRoutine, entryDate: string): boolean {
-  if (routine.is_active === false) return false
-  const ct = routine.cadence_type ?? 'none'
-  if (ct === 'none') return true
-  if (ct === 'daily') return true
-  if (ct === 'weekly') {
-    const d = new Date(entryDate + 'T12:00:00')
-    const weekday = d.getDay()
-    const days = routine.weekly_days ?? []
-    return days.includes(weekday)
-  }
-  if (ct === 'monthly') {
-    const d = new Date(entryDate + 'T12:00:00')
-    const dayOfMonth = d.getDate()
-    const days = routine.monthly_days ?? []
-    return days.includes(dayOfMonth)
-  }
-  return true
+type RoutineWithStepIds = { routine: BeautyRoutine; steps: { id: string }[] }
+
+type CareMonthState = {
+  monthLabel: string
+  today: string
+  dates: string[]
+  firstDow: number
+  morning: CareMonthCell[]
+  evening: CareMonthCell[]
+}
+
+function computeCareCell(
+  entryId: string | undefined,
+  winner: RoutineWithStepIds | undefined,
+  logsByEntry: Map<string, Set<string>>
+): CareMonthCell {
+  if (!winner || winner.steps.length === 0) return 'na'
+  if (!entryId) return 'no_entry'
+  const logs = logsByEntry.get(entryId) ?? new Set()
+  const allDone = winner.steps.every((s) => logs.has(s.id))
+  return allDone ? 'done' : 'pending'
 }
 
 function getGreeting(displayName: string | null | undefined): string {
@@ -154,9 +160,10 @@ export function Home() {
   const [outfitLoading, setOutfitLoading] = useState(false)
   const [weekPlannedDates, setWeekPlannedDates] = useState<Set<string>>(new Set())
   const [routineProgress, setRoutineProgress] = useState<RoutineProgress[]>([])
+  const [careMonth, setCareMonth] = useState<CareMonthState | null>(null)
+  const [hasAnyRoutines, setHasAnyRoutines] = useState(false)
   const [routinesLoading, setRoutinesLoading] = useState(false)
   const [taskTotal, setTaskTotal] = useState(0)
-  const [taskCompleted, setTaskCompleted] = useState(0)
   const [tasksLoading, setTasksLoading] = useState(false)
   const [prevDayHadEntry, setPrevDayHadEntry] = useState(false)
   const { layout, updateLayout } = useWidgetLayout()
@@ -251,6 +258,8 @@ export function Home() {
   useEffect(() => {
     if (!user?.id || !entry?.id || !entry?.entry_date) {
       setRoutineProgress([])
+      setCareMonth(null)
+      setHasAnyRoutines(false)
       setRoutinesLoading(false)
       return
     }
@@ -262,24 +271,103 @@ export function Home() {
         .eq('user_id', user.id)
         .order('sort_order', { ascending: true })
       const routines = (routinesData as BeautyRoutine[]) ?? []
-      const due = routines.filter((r) => isRoutineDue(r, entry.entry_date))
-      const { data: logsData } = await supabase
-        .from('beauty_logs')
-        .select('routine_step_id')
-        .eq('daily_entry_id', entry.id)
-      const completedStepIds = new Set((logsData as { routine_step_id: string }[] ?? []).map((l) => l.routine_step_id))
-      const progress: RoutineProgress[] = []
-      for (const routine of due) {
+      const routinesWithSteps: RoutineWithStepIds[] = []
+      for (const routine of routines) {
         const { data: stepsData } = await supabase
           .from('beauty_routine_steps')
           .select('id')
           .eq('routine_id', routine.id)
           .is('deleted_at', null)
-        const steps = (stepsData as BeautyRoutineStep[]) ?? []
-        const completed = steps.filter((s) => completedStepIds.has(s.id)).length
-        progress.push({ name: routine.name, completed, total: steps.length })
+        const steps = (stepsData as Pick<BeautyRoutineStep, 'id'>[]) ?? []
+        routinesWithSteps.push({ routine, steps })
       }
+
+      setHasAnyRoutines(routinesWithSteps.length > 0)
+
+      const { data: logsData } = await supabase
+        .from('beauty_logs')
+        .select('routine_step_id')
+        .eq('daily_entry_id', entry.id)
+      const completedStepIds = new Set((logsData as { routine_step_id: string }[] ?? []).map((l) => l.routine_step_id))
+
+      const dueToday = routinesWithSteps.filter(({ routine }) => isRoutineDue(routine, entry.entry_date))
+      const dedupedToday = deduplicateByTimeSlot(dueToday)
+      const progress: RoutineProgress[] = dedupedToday.map(({ routine, steps }) => ({
+        id: routine.id,
+        name: routine.name,
+        completed: steps.filter((s) => completedStepIds.has(s.id)).length,
+        total: steps.length,
+      }))
       setRoutineProgress(progress)
+
+      if (routinesWithSteps.length === 0) {
+        setCareMonth(null)
+        setRoutinesLoading(false)
+        return
+      }
+
+      const anchor = entry.entry_date
+      const [yStr, mStr] = anchor.split('-')
+      const Y = Number(yStr)
+      const Mo = Number(mStr)
+      const lastD = new Date(Y, Mo, 0).getDate()
+      const dates: string[] = []
+      for (let d = 1; d <= lastD; d++) {
+        dates.push(`${yStr}-${mStr}-${String(d).padStart(2, '0')}`)
+      }
+      const monthLabel = new Date(Y, Mo - 1, 15).toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })
+      const monthStart = `${yStr}-${mStr}-01`
+      const monthEnd = `${yStr}-${mStr}-${String(lastD).padStart(2, '0')}`
+
+      const { data: entriesData } = await supabase
+        .from('daily_entries')
+        .select('id, entry_date')
+        .eq('user_id', user.id)
+        .gte('entry_date', monthStart)
+        .lte('entry_date', monthEnd)
+      const entriesList = (entriesData as { id: string; entry_date: string }[]) ?? []
+      const entryByDate = new Map(entriesList.map((e) => [e.entry_date, e.id]))
+      const entryIds = entriesList.map((e) => e.id)
+
+      const logsByEntry = new Map<string, Set<string>>()
+      if (entryIds.length > 0) {
+        const { data: monthLogs } = await supabase
+          .from('beauty_logs')
+          .select('daily_entry_id, routine_step_id')
+          .in('daily_entry_id', entryIds)
+        for (const row of (monthLogs as { daily_entry_id: string; routine_step_id: string }[]) ?? []) {
+          if (!logsByEntry.has(row.daily_entry_id)) logsByEntry.set(row.daily_entry_id, new Set())
+          logsByEntry.get(row.daily_entry_id)!.add(row.routine_step_id)
+        }
+      }
+
+      const firstDow = (new Date(Y, Mo - 1, 1).getDay() + 6) % 7
+      const morning: CareMonthCell[] = []
+      const evening: CareMonthCell[] = []
+
+      for (const dateStr of dates) {
+        if (dateStr > anchor) {
+          morning.push('future')
+          evening.push('future')
+          continue
+        }
+        const dueDay = routinesWithSteps.filter(({ routine }) => isRoutineDue(routine, dateStr))
+        const dedupedDay = deduplicateByTimeSlot(dueDay)
+        const mR = dedupedDay.find((x) => x.routine.type === 'morning')
+        const eR = dedupedDay.find((x) => x.routine.type === 'evening')
+        const eid = entryByDate.get(dateStr)
+        morning.push(computeCareCell(eid, mR, logsByEntry))
+        evening.push(computeCareCell(eid, eR, logsByEntry))
+      }
+
+      setCareMonth({
+        dates,
+        morning,
+        evening,
+        firstDow,
+        monthLabel,
+        today: anchor,
+      })
       setRoutinesLoading(false)
     }
     load()
@@ -288,7 +376,6 @@ export function Home() {
   useEffect(() => {
     if (!entry?.id) {
       setTaskTotal(0)
-      setTaskCompleted(0)
       setTasksLoading(false)
       return
     }
@@ -298,12 +385,11 @@ export function Home() {
       try {
         const { data } = await supabase
           .from('daily_tasks')
-          .select('id, completed')
+          .select('id')
           .eq('daily_entry_id', entry.id)
         if (cancelled) return
-        const tasks = (data as Pick<DailyTask, 'id' | 'completed'>[]) ?? []
+        const tasks = (data as { id: string }[]) ?? []
         setTaskTotal(tasks.length)
-        setTaskCompleted(tasks.filter((t) => t.completed).length)
       } finally {
         if (!cancelled) setTasksLoading(false)
       }
@@ -359,7 +445,7 @@ export function Home() {
   // Day state from 5 pillars
   const waterDone = waterMl >= goalMl * 0.6
   const careDone = routineProgress.length > 0 && routineProgress.every((r) => r.total === 0 || r.completed >= r.total)
-  const tasksDone = taskTotal > 0 && taskCompleted >= taskTotal
+  const tasksDone = taskTotal === 0
   const outfitDone = !!todayOutfit
   const journalDone = !!(entry?.journal_text?.trim())
   const pillars = { waterDone, careDone, tasksDone, outfitDone, journalDone }
@@ -379,23 +465,27 @@ export function Home() {
             onAddWater={handleAddWater}
             onUpdateEntry={handleUpdateWater}
             disabled={!user}
+            userId={user?.id ?? null}
+            monthAnchorDate={entry?.entry_date ?? todayIso}
           />
         )
       case 'focus': {
-        const allTasksDone = taskTotal > 0 && taskCompleted >= taskTotal
         return (
           <div className={`dashboard-card home-focus-card${tasksDone ? ' widget--pillar-done' : ''}`}>
             <h3 className="home-canvas-widget-title">{ru.focus}</h3>
             {tasksLoading ? (
               <p className="ds-muted">{ru.loading}</p>
             ) : taskTotal === 0 ? (
-              <p className="home-focus-empty">{ru.homeFocusEmpty}</p>
-            ) : allTasksDone ? (
-              <p className="home-focus-stat">{ru.homeFocusDone}</p>
+              <p className="home-focus-stat">{ru.homeFocusNoOpenTasks}</p>
             ) : (
               <>
-                <p className="home-focus-stat">{taskCompleted}<span className="home-focus-total">/{taskTotal}</span></p>
-                <p className="ds-muted" style={{ fontSize: 11, marginTop: 2, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{ru.homeTasksCompleted}</p>
+                <p className="home-focus-stat">
+                  {taskTotal}
+                  <span className="home-focus-total"> открыто</span>
+                </p>
+                <p className="ds-muted" style={{ fontSize: 11, marginTop: 2, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                  {ru.homeTasksOpen}
+                </p>
               </>
             )}
             <Link to="/today" className="home-canvas-widget-link" style={{ marginTop: 'auto', paddingTop: 8, display: 'block' }}>
@@ -406,32 +496,43 @@ export function Home() {
       }
       case 'care': {
         const allCareDone = routineProgress.length > 0 && routineProgress.every((r) => r.total === 0 || r.completed >= r.total)
+        const stepsLeft = routineProgress.reduce((acc, r) => acc + (r.total > 0 ? Math.max(0, r.total - r.completed) : 0), 0)
         return (
           <div className={`dashboard-card home-care-card${careDone ? ' widget--pillar-done' : ''}`}>
             <h3 className="home-canvas-widget-title">{ru.beautyRoutine}</h3>
             {routinesLoading ? (
               <p className="ds-muted">{ru.loading}</p>
-            ) : routineProgress.length === 0 ? (
+            ) : !hasAnyRoutines ? (
               <p className="home-care-empty">{ru.homeCareEmpty}</p>
-            ) : allCareDone ? (
-              <p className="home-care-all-done">{ru.homeCareAllDone}</p>
             ) : (
-              <ul className="home-care-list">
-                {routineProgress.map((r) => {
-                  const done = r.total > 0 && r.completed >= r.total
-                  return (
-                    <li key={r.name} className={`home-care-item${done ? ' home-care-item--done' : ' home-care-item--muted'}`}>
-                      <span className="home-care-dot" aria-hidden />
-                      <span>
-                        {r.name}
-                        {r.total > 0 && (
-                          <span className="home-care-meta"> {r.completed}/{r.total}</span>
-                        )}
-                      </span>
-                    </li>
-                  )
-                })}
-              </ul>
+              <>
+                {routineProgress.length === 0 ? (
+                  <p className="home-care-empty home-care-empty--tight">{ru.homeCareNoScheduledToday}</p>
+                ) : allCareDone ? (
+                  <p className="home-care-all-done home-care-all-done--tight">{ru.homeCareAllDone}</p>
+                ) : stepsLeft > 0 ? (
+                  <p className="home-care-steps-left">
+                    {ru.homeCareStepsLeft}: <strong>{stepsLeft}</strong>
+                  </p>
+                ) : null}
+                {careMonth && (
+                  <div className="home-care-routine-month">
+                    <CareRoutineMonthMicro
+                      monthLabel={careMonth.monthLabel}
+                      today={careMonth.today}
+                      dates={careMonth.dates}
+                      firstDow={careMonth.firstDow}
+                      morning={careMonth.morning}
+                      evening={careMonth.evening}
+                    />
+                  </div>
+                )}
+              </>
+            )}
+            {user?.id && (
+              <div className="home-care-vitamins">
+                <VitaminMonthMicro userId={user.id} />
+              </div>
             )}
             <Link to="/today" className="home-canvas-widget-link" style={{ marginTop: 'auto', paddingTop: 8, display: 'block' }}>
               {ru.openToday}

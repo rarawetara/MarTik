@@ -19,6 +19,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { useAuth } from '../hooks/useAuth'
 import { useGetOrCreateToday } from '../hooks/useGetOrCreateToday'
 import { useTaskTemplates } from '../hooks/useTaskTemplates'
+import { useTaskCategories } from '../hooks/useTaskCategories'
 import { WaterWidget } from '../components/WaterWidget'
 import { TaskList } from '../components/TaskList'
 import { BeautyRoutineToday } from '../components/Beauty/BeautyRoutineToday'
@@ -35,8 +36,11 @@ function loadPanelOrder(): PanelId[] {
   try {
     const saved = localStorage.getItem(PANEL_ORDER_KEY)
     if (saved) {
-      const parsed: PanelId[] = JSON.parse(saved)
-      if (Array.isArray(parsed) && parsed.length === DEFAULT_PANEL_ORDER.length) return parsed
+      const parsed: string[] = JSON.parse(saved)
+      if (!Array.isArray(parsed)) return DEFAULT_PANEL_ORDER
+      const allowed = new Set<string>(DEFAULT_PANEL_ORDER)
+      const filtered = [...new Set(parsed.filter((p) => allowed.has(p)))] as PanelId[]
+      if (filtered.length === DEFAULT_PANEL_ORDER.length) return filtered
     }
   } catch {}
   return DEFAULT_PANEL_ORDER
@@ -139,8 +143,9 @@ export function Today() {
   const [savingMood, setSavingMood] = useState(false)
   const [loadingOtherDate, setLoadingOtherDate] = useState(false)
   const [panelOrder, setPanelOrder] = useState<PanelId[]>(loadPanelOrder)
-  const { templates, addTemplate, deleteTemplate, toggleTemplate, applyTemplatesToEntry } =
+  const { templates, addTemplate, deleteTemplate, toggleTemplate, applyTemplatesToEntry, carryOverFromPreviousDay } =
     useTaskTemplates(user?.id)
+  const { categories, addCategory, deleteCategory } = useTaskCategories(user?.id)
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
 
@@ -298,21 +303,27 @@ export function Today() {
     setTasks((data as DailyTask[]) ?? [])
   }, [])
 
-  // Auto-apply recurring templates when entry is ready
+  // Auto-apply recurring templates + carry over incomplete tasks when entry is ready
   useEffect(() => {
     if (!entry?.id) return
-    applyTemplatesToEntry(entry.id, selectedDate).then(() => fetchTasksForEntry(entry.id))
-  }, [entry?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+    const run = async () => {
+      await applyTemplatesToEntry(entry.id, selectedDate)
+      await carryOverFromPreviousDay(entry.id, selectedDate)
+      fetchTasksForEntry(entry.id)
+    }
+    run()
+  }, [entry?.id, templates.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleAddTask = useCallback(
-    async (title: string) => {
-      if (!user?.id || !entry?.id) return
-      await supabase.from('daily_tasks').insert({
-        user_id: user.id,
-        daily_entry_id: entry.id,
-        title,
-      })
+    async (title: string): Promise<string | undefined> => {
+      if (!user?.id || !entry?.id) return undefined
+      const { data } = await supabase
+        .from('daily_tasks')
+        .insert({ user_id: user.id, daily_entry_id: entry.id, title })
+        .select('id')
+        .single()
       fetchTasksForEntry(entry.id)
+      return (data as { id: string } | null)?.id
     },
     [user?.id, entry?.id, fetchTasksForEntry]
   )
@@ -320,11 +331,6 @@ export function Today() {
   const handleToggleTask = useCallback(
     async (taskId: string, completed: boolean) => {
       if (!entry?.id) return
-      await supabase
-        .from('daily_tasks')
-        .update({ completed, updated_at: new Date().toISOString() })
-        .eq('id', taskId)
-      // Deactivate persistent template when its task is completed
       if (completed) {
         const task = tasks.find((t) => t.id === taskId)
         if (task?.template_id) {
@@ -333,6 +339,12 @@ export function Today() {
             await toggleTemplate(tpl.id, false)
           }
         }
+        await supabase.from('daily_tasks').delete().eq('id', taskId)
+      } else {
+        await supabase
+          .from('daily_tasks')
+          .update({ completed: false, updated_at: new Date().toISOString() })
+          .eq('id', taskId)
       }
       fetchTasksForEntry(entry.id)
     },
@@ -495,6 +507,8 @@ export function Today() {
                     onAddWater={() => {}}
                     onUpdateEntry={handleUpdateWater}
                     disabled={!user}
+                    userId={user?.id ?? null}
+                    monthAnchorDate={dateStr}
                   />
                 </SortablePanel>
               )
@@ -521,13 +535,19 @@ export function Today() {
                   <TaskList
                     tasks={tasks}
                     templates={templates}
+                    categories={categories}
                     onAddTask={handleAddTask}
                     onToggleTask={handleToggleTask}
                     onDeleteTask={handleDeleteTask}
                     onRenameTask={handleRenameTask}
+                    onTaskUpdated={(id, patch) =>
+                      setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)))
+                    }
                     onAddTemplate={addTemplate}
                     onDeleteTemplate={deleteTemplate}
                     onToggleTemplate={toggleTemplate}
+                    onAddCategory={addCategory}
+                    onDeleteCategory={deleteCategory}
                     disabled={!user}
                   />
                 </SortablePanel>

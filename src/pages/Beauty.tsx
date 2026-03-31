@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Pencil, Trash2 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
@@ -12,6 +13,7 @@ import { BeautyRoutineCard } from '../components/Beauty/BeautyRoutineCard'
 import type { StepWithProduct } from '../components/Beauty/BeautyRoutineCard'
 import { BeautyRoutineForm } from '../components/Beauty/BeautyRoutineForm'
 import type { RoutineStepRow, RoutineScheduling } from '../components/Beauty/BeautyRoutineForm'
+import { VitaminTracker } from '../components/Vitamins/VitaminTracker'
 
 function getFileExtension(file: File): string {
   const mimeToExt: Record<string, string> = {
@@ -44,7 +46,15 @@ type RoutineWithSteps = {
 
 export function Beauty() {
   const { user } = useAuth()
-  const [activeTab, setActiveTab] = useState<'products' | 'routines' | 'progress'>('products')
+  const [searchParams] = useSearchParams()
+  const [activeTab, setActiveTab] = useState<'products' | 'routines' | 'progress' | 'vitamins'>('products')
+
+  useEffect(() => {
+    const t = searchParams.get('tab')
+    if (t === 'vitamins' || t === 'products' || t === 'routines' || t === 'progress') {
+      setActiveTab(t)
+    }
+  }, [searchParams])
   const [products, setProducts] = useState<BeautyProduct[]>([])
   const [filterArea, setFilterArea] = useState<string>('')
   const [filterTime, setFilterTime] = useState<string>('')
@@ -64,32 +74,6 @@ export function Beauty() {
   const [progressUploadHairQuality, setProgressUploadHairQuality] = useState<string>('')
   const [progressUploadHairLength, setProgressUploadHairLength] = useState<string>('')
   const [editingProgressPhoto, setEditingProgressPhoto] = useState<ProgressPhotoWithDate | null>(null)
-
-  // Note categories (stored per-user in localStorage)
-  const [photoCategories, setPhotoCategories] = useState<string[]>(() => {
-    try { return JSON.parse(localStorage.getItem('beauty_note_cats') ?? '[]') } catch { return [] }
-  })
-  const [newCategoryInput, setNewCategoryInput] = useState('')
-  const [progressUploadCategory, setProgressUploadCategory] = useState('')
-
-  // Diary timeline filters + inline edit
-  const [filterDiaryType, setFilterDiaryType] = useState('')
-  const [filterDiaryCategory, setFilterDiaryCategory] = useState('')
-  type DiaryInlineEdit = { photoId: string; notes: string; category: string }
-  const [inlineDiaryEdit, setInlineDiaryEdit] = useState<DiaryInlineEdit | null>(null)
-
-  // Future tasks (persisted in localStorage)
-  type FutureTask = { id: string; text: string; createdAt: string; completedAt: string | null; dueDate: string }
-  const todayStr = new Date().toISOString().slice(0, 10)
-  const [futureTasks, setFutureTasks] = useState<FutureTask[]>(() => {
-    try {
-      const raw: FutureTask[] = JSON.parse(localStorage.getItem('beauty_future_tasks') ?? '[]')
-      // Roll over incomplete tasks to today
-      return raw.map((t) => t.completedAt ? t : { ...t, dueDate: todayStr })
-    } catch { return [] }
-  })
-  const [newFutureTaskText, setNewFutureTaskText] = useState('')
-  const [showDoneFutureTasks, setShowDoneFutureTasks] = useState(false)
 
   const fetchProducts = useCallback(async () => {
     if (!user?.id) return
@@ -207,46 +191,6 @@ export function Beauty() {
     }
   }, [activeTab, fetchProgressPhotos])
 
-  // Persist future tasks
-  useEffect(() => {
-    localStorage.setItem('beauty_future_tasks', JSON.stringify(futureTasks))
-  }, [futureTasks])
-
-  // Persist categories
-  useEffect(() => {
-    localStorage.setItem('beauty_note_cats', JSON.stringify(photoCategories))
-  }, [photoCategories])
-
-  const addFutureTask = useCallback((text: string) => {
-    if (!text.trim()) return
-    setFutureTasks((prev) => [...prev, {
-      id: crypto.randomUUID(), text: text.trim(),
-      createdAt: new Date().toISOString(), completedAt: null, dueDate: todayStr,
-    }])
-    setNewFutureTaskText('')
-  }, [todayStr])
-
-  const toggleFutureTask = useCallback((id: string) => {
-    setFutureTasks((prev) => prev.map((t) =>
-      t.id !== id ? t : { ...t, completedAt: t.completedAt ? null : new Date().toISOString() }
-    ))
-  }, [])
-
-  const deleteFutureTask = useCallback((id: string) => {
-    setFutureTasks((prev) => prev.filter((t) => t.id !== id))
-  }, [])
-
-  const addCategory = useCallback((name: string) => {
-    const n = name.trim()
-    if (!n || photoCategories.includes(n)) return
-    setPhotoCategories((prev) => [...prev, n])
-    setNewCategoryInput('')
-  }, [photoCategories])
-
-  const removeCategory = useCallback((name: string) => {
-    setPhotoCategories((prev) => prev.filter((c) => c !== name))
-  }, [])
-
   const handleUploadProgress = useCallback(
     async (
       area: 'face' | 'hair',
@@ -256,8 +200,7 @@ export function Beauty() {
       routineId: string | null,
       faceRating: string | null,
       hairQualityRating: string | null,
-      hairLengthRating: string | null,
-      noteCategory: string | null
+      hairLengthRating: string | null
     ) => {
       if (!user?.id) return
       const entry = await getOrCreateDailyEntry(user.id, dateStr)
@@ -278,7 +221,6 @@ export function Beauty() {
         area,
         photo_url: urlData.publicUrl,
         notes: notes.trim() || null,
-        note_category: noteCategory || null,
         taken_at: takenAt,
         updated_at: now,
       }
@@ -290,7 +232,6 @@ export function Beauty() {
       if (insertError) throw new Error(insertError.message)
       setProgressUploadArea(null)
       setProgressUploadNotes('')
-      setProgressUploadCategory('')
       setProgressUploadFile(null)
       setProgressUploadDate(toDateString(new Date()))
       setProgressUploadRoutineId('')
@@ -310,12 +251,10 @@ export function Beauty() {
       faceRating: string | null,
       hairQualityRating: string | null,
       hairLengthRating: string | null,
-      area: string,
-      noteCategory?: string | null
+      area: string
     ) => {
       const payload: Record<string, unknown> = {
         notes: notes.trim() || null,
-        note_category: noteCategory !== undefined ? (noteCategory || null) : undefined,
         updated_at: new Date().toISOString(),
         routine_id: routineId || null,
       }
@@ -388,18 +327,29 @@ export function Beauty() {
   const handleSave = useCallback(
     async (values: BeautyProductFormValues, photoFile: File | null) => {
       if (!user?.id) return
+      const sharedFields = {
+        name: values.name.trim(),
+        category: values.category || null,
+        area: values.area || null,
+        time_of_day: values.time_of_day || null,
+        notes: values.notes.trim() || null,
+        price: values.price !== '' ? parseFloat(values.price) : null,
+        rating_black_dots: values.rating_black_dots ?? null,
+        rating_radiance: values.rating_radiance ?? null,
+        rating_firmness: values.rating_firmness ?? null,
+        rating_even_tone: values.rating_even_tone ?? null,
+        rating_scent: values.rating_scent ?? null,
+        rating_packaging: values.rating_packaging ?? null,
+        rating_appearance: values.rating_appearance ?? null,
+        updated_at: new Date().toISOString(),
+      }
       if (formProduct === 'new' || formProduct === null) {
         const { data: inserted, error: insertError } = await supabase
           .from('beauty_products')
           .insert({
             user_id: user.id,
-            name: values.name.trim(),
-            category: values.category || null,
-            area: values.area || null,
-            time_of_day: values.time_of_day || null,
-            notes: values.notes.trim() || null,
+            ...sharedFields,
             sort_order: 0,
-            updated_at: new Date().toISOString(),
           })
           .select('id')
           .single()
@@ -425,14 +375,7 @@ export function Beauty() {
         const productId = formProduct.id
         await supabase
           .from('beauty_products')
-          .update({
-            name: values.name.trim(),
-            category: values.category || null,
-            area: values.area || null,
-            time_of_day: values.time_of_day || null,
-            notes: values.notes.trim() || null,
-            updated_at: new Date().toISOString(),
-          })
+          .update(sharedFields)
           .eq('id', productId)
         if (photoFile) {
           const ext = getFileExtension(photoFile)
@@ -564,6 +507,23 @@ export function Beauty() {
     [user?.id, formRoutine, fetchRoutines]
   )
 
+  const handleRoutineRatingChange = useCallback(
+    async (routineId: string, rating: number | null) => {
+      if (!user?.id) return
+      const { error } = await supabase
+        .from('beauty_routines')
+        .update({ rating, updated_at: new Date().toISOString() })
+        .eq('id', routineId)
+        .eq('user_id', user.id)
+      if (error) {
+        console.error('Routine rating update:', error)
+        return
+      }
+      await fetchRoutines()
+    },
+    [user?.id, fetchRoutines]
+  )
+
   const handleDeleteRoutine = useCallback(
     async (routine: BeautyRoutine) => {
       if (!window.confirm(ru.deleteRoutineConfirm)) return
@@ -578,6 +538,7 @@ export function Beauty() {
     { id: 'products' as const, label: ru.productsTab },
     { id: 'routines' as const, label: ru.routinesTab },
     { id: 'progress' as const, label: ru.progressTab },
+    { id: 'vitamins' as const, label: 'Витамины' },
   ]
 
   const filteredRoutines = filterRoutineType
@@ -664,7 +625,7 @@ export function Beauty() {
               {routinesWithSteps.length === 0 ? ru.noRoutines : ru.noProductsFilter}
             </div>
           ) : (
-            <div className="catalog-list">
+            <div className="beauty-routine-list">
               {filteredRoutines.map(({ routine, stepsWithProduct }) => (
                 <BeautyRoutineCard
                   key={routine.id}
@@ -672,6 +633,9 @@ export function Beauty() {
                   stepsWithProduct={stepsWithProduct}
                   onEdit={setFormRoutine}
                   onDelete={handleDeleteRoutine}
+                  onRoutineRatingChange={handleRoutineRatingChange}
+                  onProductEdit={setFormProduct}
+                  onProductDelete={handleDelete}
                 />
               ))}
             </div>
@@ -735,19 +699,6 @@ export function Beauty() {
                   rows={2}
                 />
               </div>
-              {photoCategories.length > 0 && (
-                <div className="form-group">
-                  <label>Категория</label>
-                  <select
-                    className="ds-select"
-                    value={progressUploadCategory}
-                    onChange={(e) => setProgressUploadCategory(e.target.value)}
-                  >
-                    <option value="">— без категории —</option>
-                    {photoCategories.map((c) => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-              )}
               {progressUploadArea === 'face' && (
                 <div className="form-group">
                   <label>{ru.progressFaceCondition}</label>
@@ -838,8 +789,7 @@ export function Beauty() {
                         progressUploadRoutineId || null,
                         progressUploadFaceRating || null,
                         progressUploadHairQuality || null,
-                        progressUploadHairLength || null,
-                        progressUploadCategory || null
+                        progressUploadHairLength || null
                       )
                     } catch (err) {
                       console.error(err)
@@ -880,15 +830,6 @@ export function Beauty() {
                 <label>{ru.progressNotes}</label>
                 <textarea value={editingProgressPhoto.notes ?? ''} onChange={(e) => setEditingProgressPhoto((p) => (p ? { ...p, notes: e.target.value } : null))} placeholder={ru.progressNotesPlaceholder} rows={2} />
               </div>
-              {photoCategories.length > 0 && (
-                <div className="form-group">
-                  <label>Категория</label>
-                  <select className="ds-select" value={editingProgressPhoto.note_category ?? ''} onChange={(e) => setEditingProgressPhoto((p) => (p ? { ...p, note_category: e.target.value || null } : null))}>
-                    <option value="">— без категории —</option>
-                    {photoCategories.map((c) => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-              )}
               <div className="beauty-progress-upload__actions">
                 <button type="button" className="btn-ghost" onClick={() => setEditingProgressPhoto(null)}>{ru.cancel}</button>
                 <button type="button" className="btn-primary" onClick={async () => {
@@ -900,7 +841,7 @@ export function Beauty() {
                       editingProgressPhoto.area === 'face' ? (editingProgressPhoto.face_condition_rating ?? null) : null,
                       editingProgressPhoto.area === 'hair' ? (editingProgressPhoto.hair_quality_rating ?? null) : null,
                       editingProgressPhoto.area === 'hair' ? (editingProgressPhoto.hair_length_feeling_rating ?? null) : null,
-                      editingProgressPhoto.area, editingProgressPhoto.note_category ?? null
+                      editingProgressPhoto.area
                     )
                   } catch (err) { console.error(err) }
                 }}>{ru.save}</button>
@@ -933,148 +874,10 @@ export function Beauty() {
               ))}
             </div>
           )}
-
-          {/* ── Категории заметок ────────────────────────── */}
-          <div className="progress-section-card">
-            <p className="progress-section-label">Категории заметок</p>
-            <div className="progress-cats">
-              {photoCategories.map((cat) => (
-                <span key={cat} className="progress-cat-pill">
-                  {cat}
-                  <button type="button" className="progress-cat-pill__remove" onClick={() => removeCategory(cat)} aria-label="Удалить">✕</button>
-                </span>
-              ))}
-              <form onSubmit={(e) => { e.preventDefault(); addCategory(newCategoryInput) }} className="progress-cat-add">
-                <input value={newCategoryInput} onChange={(e) => setNewCategoryInput(e.target.value)} placeholder="Новая категория..." className="progress-cat-add__input" />
-                <button type="submit" className="progress-cat-add__btn">+</button>
-              </form>
-            </div>
-          </div>
-
-          {/* ── Дневник (таймлайн заметок) ───────────────── */}
-          <div className="progress-section-card">
-            <p className="progress-section-label">Дневник</p>
-
-            {/* Фильтры */}
-            <div className="progress-diary-filters">
-              {(['', 'face', 'hair'] as const).map((v) => (
-                <button key={v} type="button" className={`progress-diary-filter-btn${filterDiaryType === v ? ' active' : ''}`} onClick={() => setFilterDiaryType(v)}>
-                  {v === '' ? 'Все' : v === 'face' ? 'Лицо' : 'Волосы'}
-                </button>
-              ))}
-              {photoCategories.length > 0 && (
-                <select className="catalog-select" style={{ marginLeft: 8 }} value={filterDiaryCategory} onChange={(e) => setFilterDiaryCategory(e.target.value)}>
-                  <option value="">Все категории</option>
-                  {photoCategories.map((c) => <option key={c} value={c}>{c}</option>)}
-                </select>
-              )}
-            </div>
-
-            {/* Таймлайн */}
-            {(() => {
-              const diaryEntries = progressPhotos
-                .filter((p) => p.notes)
-                .filter((p) => !filterDiaryType || p.area === filterDiaryType)
-                .filter((p) => !filterDiaryCategory || p.note_category === filterDiaryCategory)
-              if (diaryEntries.length === 0) return <p className="progress-diary-empty">Нет записей</p>
-              return (
-                <div className="progress-diary-timeline">
-                  {diaryEntries.map((photo, idx) => (
-                    <div key={photo.id} className="progress-diary-entry">
-                      <div className="progress-diary-entry__dot-col">
-                        <div className={`progress-diary-entry__dot${photo.notes ? ' has-note' : ''}`} />
-                        {idx < diaryEntries.length - 1 && <div className="progress-diary-entry__line" />}
-                      </div>
-                      <div className="progress-diary-entry__body">
-                        <div className="progress-diary-entry__header">
-                          <span className="progress-diary-entry__date">
-                            {photo.entry_date ? new Date(photo.entry_date + 'T12:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }) : '—'}
-                          </span>
-                          <span className="progress-note-pill">{photo.area === 'face' ? 'Лицо' : 'Волосы'}</span>
-                          {photo.note_category && <span className="progress-note-pill">{photo.note_category}</span>}
-                          <button type="button" className="progress-diary-edit-btn" title="Редактировать"
-                            onClick={() => setInlineDiaryEdit({ photoId: photo.id, notes: photo.notes ?? '', category: photo.note_category ?? '' })}>
-                            ✎
-                          </button>
-                        </div>
-                        {inlineDiaryEdit?.photoId === photo.id ? (
-                          <div className="progress-diary-inline-form">
-                            <textarea value={inlineDiaryEdit.notes} onChange={(e) => setInlineDiaryEdit((s) => s ? { ...s, notes: e.target.value } : null)} rows={3} className="progress-diary-textarea" />
-                            {photoCategories.length > 0 && (
-                              <select className="catalog-select" value={inlineDiaryEdit.category} onChange={(e) => setInlineDiaryEdit((s) => s ? { ...s, category: e.target.value } : null)}>
-                                <option value="">— без категории —</option>
-                                {photoCategories.map((c) => <option key={c} value={c}>{c}</option>)}
-                              </select>
-                            )}
-                            <div className="progress-diary-inline-form__actions">
-                              <button type="button" className="btn-primary progress-btn-sm" onClick={async () => {
-                                if (!inlineDiaryEdit) return
-                                await handleUpdateProgress(photo.id, inlineDiaryEdit.notes, photo.routine_id ?? null,
-                                  photo.area === 'face' ? (photo.face_condition_rating ?? null) : null,
-                                  photo.area === 'hair' ? (photo.hair_quality_rating ?? null) : null,
-                                  photo.area === 'hair' ? (photo.hair_length_feeling_rating ?? null) : null,
-                                  photo.area, inlineDiaryEdit.category || null)
-                                setInlineDiaryEdit(null)
-                              }}>Сохранить</button>
-                              <button type="button" className="btn-ghost progress-btn-sm" onClick={() => setInlineDiaryEdit(null)}>Отмена</button>
-                            </div>
-                          </div>
-                        ) : (
-                          <p className="progress-diary-entry__note">{photo.notes}</p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )
-            })()}
-          </div>
-
-          {/* ── Задачи на будущее ─────────────────────────── */}
-          <div className="progress-section-card">
-            <p className="progress-section-label">Задачи на будущее</p>
-            {/* Active tasks */}
-            {futureTasks.filter((t) => !t.completedAt).length === 0 && (
-              <p className="progress-diary-empty">Нет активных задач</p>
-            )}
-            <ul className="future-task-list">
-              {futureTasks.filter((t) => !t.completedAt).map((task) => (
-                <li key={task.id} className="future-task-item">
-                  <button type="button" className="future-task-item__check" onClick={() => toggleFutureTask(task.id)} aria-label="Выполнено" />
-                  <span className="future-task-item__text">{task.text}</span>
-                  <span className="future-task-item__date">{new Date(task.createdAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}</span>
-                  <button type="button" className="future-task-item__delete" onClick={() => deleteFutureTask(task.id)} aria-label="Удалить">✕</button>
-                </li>
-              ))}
-            </ul>
-            {/* Done tasks */}
-            {futureTasks.filter((t) => t.completedAt).length > 0 && (
-              <>
-                <button type="button" className="future-tasks-toggle" onClick={() => setShowDoneFutureTasks((v) => !v)}>
-                  Выполнено ({futureTasks.filter((t) => t.completedAt).length}) {showDoneFutureTasks ? '▲' : '▼'}
-                </button>
-                {showDoneFutureTasks && (
-                  <ul className="future-task-list future-task-list--done">
-                    {futureTasks.filter((t) => t.completedAt).map((task) => (
-                      <li key={task.id} className="future-task-item future-task-item--done">
-                        <button type="button" className="future-task-item__check future-task-item__check--done" onClick={() => toggleFutureTask(task.id)} aria-label="Снять" />
-                        <span className="future-task-item__text">{task.text}</span>
-                        <span className="future-task-item__date">{new Date(task.completedAt!).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}</span>
-                        <button type="button" className="future-task-item__delete" onClick={() => deleteFutureTask(task.id)} aria-label="Удалить">✕</button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </>
-            )}
-            {/* Add form */}
-            <form className="future-task-add" onSubmit={(e) => { e.preventDefault(); addFutureTask(newFutureTaskText) }}>
-              <input value={newFutureTaskText} onChange={(e) => setNewFutureTaskText(e.target.value)} placeholder="Новая задача..." className="future-task-add__input" />
-              <button type="submit" className="future-task-add__btn" aria-label="Добавить">+</button>
-            </form>
-          </div>
         </>
       )}
+
+      {activeTab === 'vitamins' && <VitaminTracker />}
 
       {formProduct != null && (
         <BeautyProductForm
