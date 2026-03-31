@@ -1,0 +1,12 @@
+# https://docs.netlify.com/configure-builds/file-based-configuration/
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+# React Router (SPA): все пути отдают index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
