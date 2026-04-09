@@ -7,7 +7,13 @@ if (!ok) {
   throw new Error('Missing or invalid VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY')
 }
 
-export const supabase = createClient(url, anonKey)
+export const supabase = createClient(url, anonKey, {
+  global: {
+    headers: {
+      apikey: anonKey,
+    },
+  },
+})
 
 export type Profile = {
   id: string

@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom'
 import {
   BookOpen,
   CalendarDays,
+  CheckSquare,
   Heart,
   Home,
   Settings2,
@@ -18,6 +19,7 @@ const items: {
 }[] = [
   { to: '/', end: true, label: ru.navHome, Icon: Home },
   { to: '/today', label: ru.navToday, Icon: CalendarDays },
+  { to: '/tasks', label: ru.navTasks, Icon: CheckSquare },
   { to: '/beauty', label: ru.navBeauty, Icon: Sparkles },
   { to: '/wishlist', label: ru.navWishlist, Icon: Heart },
   { to: '/wardrobe', label: ru.navWardrobe, Icon: Shirt },

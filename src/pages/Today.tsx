@@ -25,6 +25,8 @@ import { TaskList } from '../components/TaskList'
 import { BeautyRoutineToday } from '../components/Beauty/BeautyRoutineToday'
 import { supabase } from '../lib/supabase'
 import { ru } from '../constants/ru'
+import { capitalizeSentenceStarts } from '../lib/textInput'
+import { formatCalendarDayTitle, toIsoDateString } from '../utils/dateFormat'
 import type { DailyEntry, DailyTask, Profile } from '../lib/supabase'
 
 type PanelId = 'water' | 'tasks' | 'beauty' | 'mood' | 'journal'
@@ -110,24 +112,11 @@ function getDailyJournalPrompt(dateStr: string): string {
   return JOURNAL_PROMPTS[Math.abs(dayIndex) % JOURNAL_PROMPTS.length]
 }
 
-function toDateString(d: Date): string {
-  return d.toISOString().slice(0, 10)
-}
-
-function formatDateLabel(date: Date): string {
-  const today = toDateString(new Date())
-  const ds = toDateString(date)
-  const dayMonth = date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })
-  if (ds === today) return ru.dateTodayPrefix + dayMonth
-  const weekdayDayMonth = date.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' })
-  return weekdayDayMonth.charAt(0).toUpperCase() + weekdayDayMonth.slice(1)
-}
-
 export function Today() {
   const { user } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const dateParam = searchParams.get('date')
-  const isToday = !dateParam || dateParam === toDateString(new Date())
+  const isToday = !dateParam || dateParam === toIsoDateString(new Date())
   const [selectedDate, setSelectedDate] = useState(() =>
     dateParam ? new Date(dateParam + 'T12:00:00') : new Date()
   )
@@ -143,8 +132,15 @@ export function Today() {
   const [savingMood, setSavingMood] = useState(false)
   const [loadingOtherDate, setLoadingOtherDate] = useState(false)
   const [panelOrder, setPanelOrder] = useState<PanelId[]>(loadPanelOrder)
-  const { templates, addTemplate, deleteTemplate, toggleTemplate, applyTemplatesToEntry, carryOverFromPreviousDay } =
-    useTaskTemplates(user?.id)
+  const {
+    templates,
+    templatesTableMissing,
+    addTemplate,
+    deleteTemplate,
+    toggleTemplate,
+    applyTemplatesToEntry,
+    carryOverFromPreviousDay,
+  } = useTaskTemplates(user?.id)
   const { categories, addCategory, deleteCategory } = useTaskCategories(user?.id)
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
@@ -163,7 +159,7 @@ export function Today() {
 
   const journalTextareaRef = useRef<HTMLTextAreaElement>(null)
 
-  const dateStr = toDateString(selectedDate)
+  const dateStr = toIsoDateString(selectedDate)
 
   useEffect(() => {
     if (!user?.id) return
@@ -234,14 +230,14 @@ export function Today() {
     const d = new Date(selectedDate)
     d.setDate(d.getDate() - 1)
     setSelectedDate(d)
-    setSearchParams({ date: toDateString(d) })
+    setSearchParams({ date: toIsoDateString(d) })
   }, [selectedDate, setSearchParams])
 
   const goNext = useCallback(() => {
     const d = new Date(selectedDate)
     d.setDate(d.getDate() + 1)
     setSelectedDate(d)
-    setSearchParams({ date: toDateString(d) })
+    setSearchParams({ date: toIsoDateString(d) })
   }, [selectedDate, setSearchParams])
 
   const goToToday = useCallback(() => {
@@ -252,10 +248,12 @@ export function Today() {
 
   const saveJournal = useCallback(async () => {
     if (!entry?.id) return
+    const normalized = capitalizeSentenceStarts(journalDraft)
+    if (normalized !== journalDraft) setJournalDraft(normalized)
     setSavingJournal(true)
     await supabase
       .from('daily_entries')
-      .update({ journal_text: journalDraft, updated_at: new Date().toISOString() })
+      .update({ journal_text: normalized, updated_at: new Date().toISOString() })
       .eq('id', entry.id)
     setSavingJournal(false)
     if (isToday) refetch()
@@ -391,7 +389,7 @@ export function Today() {
             >
               <ChevronLeft size={22} strokeWidth={1.8} aria-hidden />
             </button>
-            <h1 className="page-today__title">{formatDateLabel(selectedDate)}</h1>
+            <h1 className="page-today__title">{formatCalendarDayTitle(selectedDate)}</h1>
             <div className="page-today__header-right">
               <button
                 type="button"
@@ -426,7 +424,7 @@ export function Today() {
         >
           <ChevronLeft size={22} strokeWidth={1.8} aria-hidden />
         </button>
-        <h1 className="page-today__title">{formatDateLabel(selectedDate)}</h1>
+        <h1 className="page-today__title">{formatCalendarDayTitle(selectedDate)}</h1>
         <div className="page-today__header-right">
           <button
             type="button"
@@ -458,6 +456,9 @@ export function Today() {
                     placeholder={getDailyJournalPrompt(dateStr)}
                     disabled={!user}
                     rows={6}
+                    lang="ru"
+                    spellCheck
+                    autoCapitalize="sentences"
                   />
                   <div className="today-journal-footer">
                     {savingJournal
@@ -543,9 +544,9 @@ export function Today() {
                     onTaskUpdated={(id, patch) =>
                       setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)))
                     }
-                    onAddTemplate={addTemplate}
-                    onDeleteTemplate={deleteTemplate}
-                    onToggleTemplate={toggleTemplate}
+                    onAddTemplate={templatesTableMissing ? undefined : addTemplate}
+                    onDeleteTemplate={templatesTableMissing ? undefined : deleteTemplate}
+                    onToggleTemplate={templatesTableMissing ? undefined : toggleTemplate}
                     onAddCategory={addCategory}
                     onDeleteCategory={deleteCategory}
                     disabled={!user}

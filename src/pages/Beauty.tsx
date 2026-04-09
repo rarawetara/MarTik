@@ -2,8 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Pencil, Trash2 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
-import { supabase } from '../lib/supabase'
-import { BEAUTY_PRODUCTS_BUCKET, BEAUTY_PROGRESS_BUCKET } from '../lib/supabase'
+import { supabase, BEAUTY_PRODUCTS_BUCKET, BEAUTY_PROGRESS_BUCKET } from '../lib/supabase'
 import type { BeautyProduct, BeautyRoutine, BeautyRoutineStep, BeautyProgressPhoto, DailyEntry } from '../lib/supabase'
 import { ru } from '../constants/ru'
 import { BeautyProductCard } from '../components/Beauty/BeautyProductCard'
@@ -14,6 +13,7 @@ import type { StepWithProduct } from '../components/Beauty/BeautyRoutineCard'
 import { BeautyRoutineForm } from '../components/Beauty/BeautyRoutineForm'
 import type { RoutineStepRow, RoutineScheduling } from '../components/Beauty/BeautyRoutineForm'
 import { VitaminTracker } from '../components/Vitamins/VitaminTracker'
+import { toIsoDateString } from '../utils/dateFormat'
 
 function getFileExtension(file: File): string {
   const mimeToExt: Record<string, string> = {
@@ -23,10 +23,6 @@ function getFileExtension(file: File): string {
     'image/gif': 'gif',
   }
   return mimeToExt[file.type] ?? 'jpg'
-}
-
-function toDateString(d: Date): string {
-  return d.toISOString().slice(0, 10)
 }
 
 type ProgressPhotoWithDate = BeautyProgressPhoto & { entry_date?: string; routine_name?: string }
@@ -65,7 +61,7 @@ export function Beauty() {
   const [progressPhotos, setProgressPhotos] = useState<ProgressPhotoWithDate[]>([])
   const [filterProgressArea, setFilterProgressArea] = useState<string>('')
   const [progressUploadArea, setProgressUploadArea] = useState<'face' | 'hair' | null>(null)
-  const [progressUploadDate, setProgressUploadDate] = useState<string>(() => toDateString(new Date()))
+  const [progressUploadDate, setProgressUploadDate] = useState<string>(() => toIsoDateString(new Date()))
   const [progressUploadNotes, setProgressUploadNotes] = useState('')
   const [progressUploadFile, setProgressUploadFile] = useState<File | null>(null)
   const [progressUploading, setProgressUploading] = useState(false)
@@ -233,7 +229,7 @@ export function Beauty() {
       setProgressUploadArea(null)
       setProgressUploadNotes('')
       setProgressUploadFile(null)
-      setProgressUploadDate(toDateString(new Date()))
+      setProgressUploadDate(toIsoDateString(new Date()))
       setProgressUploadRoutineId('')
       setProgressUploadFaceRating('')
       setProgressUploadHairQuality('')

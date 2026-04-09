@@ -4,15 +4,38 @@ import { ru } from '../constants/ru'
 
 type Mode = 'login' | 'signup'
 
-function mapAuthError(message: string): string {
-  const m = message.toLowerCase()
-  if (m.includes('invalid api key') || m.includes('jwt') && m.includes('invalid')) return ru.errorInvalidApiKey
-  if (m.includes('401')) return ru.errorInvalidApiKey
+type AuthErr = { message: string; status?: number; code?: string }
+
+function mapAuthError(err: AuthErr): string {
+  const code = (err.code ?? '').toLowerCase()
+  const m = err.message.toLowerCase()
+
+  if (code === 'invalid_credentials') return ru.errorInvalidLogin
+  if (code === 'email_not_confirmed' || code === 'provider_email_needs_verification')
+    return ru.errorEmailNotConfirmed
+  if (code === 'email_provider_disabled') return ru.errorEmailProviderDisabled
+  if (code === 'signup_disabled') return ru.errorSignupDisabled
+  if (code === 'captcha_failed') return ru.errorCaptchaFailed
+  if (code === 'weak_password') return ru.errorWeakPassword
+  if (code === 'email_address_invalid') return ru.errorEmailInvalid
+  if (code === 'email_address_not_authorized') return ru.errorEmailNotAuthorized
+
+  if (m.includes('invalid api key') || (m.includes('jwt') && m.includes('invalid')))
+    return ru.errorInvalidApiKey
+  if (m.includes('401') || err.status === 401) return ru.errorInvalidApiKey
   if (m.includes('already') && (m.includes('registered') || m.includes('exists'))) return ru.errorUserExists
-  if (m.includes('rate') || m.includes('429') || m.includes('too many')) return ru.errorRateLimit
+  if (m.includes('rate') || m.includes('429') || m.includes('too many') || code.includes('rate_limit'))
+    return ru.errorRateLimit
   if (m.includes('not confirmed') || m.includes('email_not_confirmed')) return ru.errorEmailNotConfirmed
-  if (m.includes('invalid login credentials') || m.includes('invalid credentials')) return ru.errorInvalidLogin
+  if (
+    m.includes('invalid login credentials') ||
+    m.includes('invalid credentials') ||
+    m.includes('invalid_grant')
+  )
+    return ru.errorInvalidLogin
   if (m.includes('invalid') && m.includes('password')) return ru.errorInvalidLogin
+
+  if (err.status === 400) return ru.authError400
   return ru.authError
 }
 
@@ -37,7 +60,7 @@ export function LoginPage() {
     try {
         if (mode === 'login') {
         const { error: err } = await supabase.auth.signInWithPassword({ email, password })
-        if (err) setError(mapAuthError(`${err.message} ${err.status ?? ''}`))
+        if (err) setError(mapAuthError(err))
       } else {
         const redirectTo =
           typeof window !== 'undefined' ? `${window.location.origin}/` : undefined
@@ -47,7 +70,7 @@ export function LoginPage() {
           options: redirectTo ? { emailRedirectTo: redirectTo } : undefined,
         })
         if (err) {
-          setError(mapAuthError(`${err.message} ${err.status ?? ''}`))
+          setError(mapAuthError(err))
           return
         }
         if (data?.user) {

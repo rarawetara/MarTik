@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
-import { BEAUTY_PRODUCTS_BUCKET } from '../lib/supabase'
+import { supabase, BEAUTY_PRODUCTS_BUCKET } from '../lib/supabase'
 import type { WishlistItem, WishlistMeta, WishlistTargetKind } from '../lib/supabase'
 import { moveWishlistItemToOwned, type MoveWishlistResult } from '../lib/wishlistMove'
 

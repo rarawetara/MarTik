@@ -61,10 +61,10 @@ body {
 }
 
 p {
-  font-size: 14px;
-  line-height: 1.5;
-  margin: 0 0 0.5em;
-  color: var(--text-primary);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  margin: 0 0 0.65em;
+  color: #141414;
 }
 
 small, .text-sm {
@@ -3402,4 +3402,21 @@ button:focus-visible,
   .dashboard-card, .card {
     padding: 16px !important;
   }
+}
+
+/* Страница «Задачи» */
+.page-tasks__lede {
+  margin: 0 0 1rem;
+  max-width: 42rem;
+  color: var(--text-secondary, #4b4b48);
+}
+.page-tasks__hint {
+  margin: 0 0 1rem;
+  max-width: 44rem;
+}
+.page-tasks__section {
+  margin-top: 0.25rem;
+}
+.page-tasks__footer {
+  margin-top: 1.5rem;
 }

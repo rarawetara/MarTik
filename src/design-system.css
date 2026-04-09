@@ -12,8 +12,8 @@
   /* ── Text ── */
   --text-primary:   #1C1C1A;
   --text-secondary: #4B4B48;
-  --text-muted:     #7A7A77;
-  --text-light:     #A8A8A5;
+  --text-muted:     #000000;
+  --text-light:     #000000;
 
   /* ── Borders ── */
   --line:          #D4D4D4;
@@ -155,7 +155,7 @@ h4 {
   h1, .ds-page-title { font-size: 32px; }
   h2 { font-size: 28px; }
   h3 { font-size: 22px; }
-  p  { font-size: 14px; }
+  p  { font-size: 18px; }
 }
 
 @media (max-width: 600px) {
@@ -3926,4 +3926,327 @@ select.outfit-slot-select:focus,
 
 .home-vitamin-micro__link.subtle {
   color: var(--text-muted);
+}
+
+/* =========================================================
+   MärTik — typography cleanup patch
+   Add at the very end of the stylesheet
+   ========================================================= */
+
+:root {
+  /* Fonts */
+  --font-display: 'Zen Kurenaido', system-ui, sans-serif;
+  --font-body: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-heading: var(--font-body);
+
+  /* Text colors */
+  --text-primary: #1F1728;
+  --text-secondary: #5F556B;
+  --text-muted: #8B8197;
+  --text-light: #A79DAF;
+
+  /* Type scale */
+  --fs-12: 12px;
+  --fs-14: 14px;
+  --fs-16: 16px;
+  --fs-18: 18px;
+  --fs-20: 20px;
+  --fs-24: 24px;
+  --fs-30: 30px;
+
+  /* Line heights */
+  --lh-tight: 1.2;
+  --lh-heading: 1.3;
+  --lh-body: 1.5;
+  --lh-relaxed: 1.6;
+
+  /* Letter spacing */
+  --ls-tight: -0.01em;
+  --ls-normal: 0;
+  --ls-wide: 0.04em;
+}
+
+/* Base */
+body {
+  font-family: var(--font-body) !important;
+  font-size: var(--fs-16) !important;
+  font-weight: 400 !important;
+  line-height: var(--lh-body) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Main page titles */
+h1,
+.ds-page-title,
+.page-today__title,
+.beauty-header__title,
+.diary-page .ds-page-title,
+.wardrobe-title,
+.catalog-header__title {
+  font-family: var(--font-display) !important;
+  font-size: var(--fs-30) !important;
+  font-weight: 400 !important;
+  line-height: var(--lh-tight) !important;
+  letter-spacing: var(--ls-tight) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Secondary headings */
+h2 {
+  font-family: var(--font-body) !important;
+  font-size: var(--fs-24) !important;
+  font-weight: 600 !important;
+  line-height: var(--lh-heading) !important;
+  color: var(--text-primary) !important;
+}
+
+h3 {
+  font-family: var(--font-body) !important;
+  font-size: var(--fs-20) !important;
+  font-weight: 600 !important;
+  line-height: var(--lh-heading) !important;
+  color: var(--text-primary) !important;
+}
+
+h4,
+.dashboard-card-title {
+  font-family: var(--font-body) !important;
+  font-size: var(--fs-18) !important;
+  font-weight: 600 !important;
+  line-height: 1.35 !important;
+  color: var(--text-primary) !important;
+}
+
+/* Default text */
+p,
+.today-journal-textarea,
+.journal-book__textarea,
+.global-task-item__title,
+.catalog-card__name,
+.beauty-product-card__name,
+.wardrobe-outfits-link,
+.page-today__evening-sub,
+.home-bottombar__date,
+.ds-muted {
+  font-family: var(--font-body) !important;
+  font-size: var(--fs-16) !important;
+  line-height: var(--lh-body) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Secondary UI text */
+.form-group label,
+.catalog-card__meta,
+.today-journal-footer,
+.page-today__mood-hint,
+.home-day-state__sub,
+.home-recovery-msg,
+.beauty-product-card__meta,
+.diary-row__pct,
+.diary-row__month,
+.diary-week__pct,
+.global-task-panel__count,
+.global-task-panel__empty,
+.product-card-price,
+.product-card-rating-row__label,
+.home-care-steps-left,
+.beauty-today-streak__line,
+.beauty-today-vitamins__card-progress,
+.water-widget-month__loading {
+  font-family: var(--font-body) !important;
+  font-size: var(--fs-14) !important;
+  line-height: 1.45 !important;
+  color: var(--text-secondary) !important;
+}
+
+/* Small captions / meta */
+.ds-section-title,
+.diary-week__label,
+.diary-row__dow,
+.product-rating__label,
+.product-price-input__currency,
+.catalog-card__tag,
+.wishlist-card__badge,
+.progress-section-label,
+.progress-note-pill,
+.progress-diary-entry__date,
+.future-task-item__date,
+.home-vitamin-micro__label,
+.home-vitamin-micro__month,
+.home-vitamin-micro__link,
+.home-care-month-split__range,
+.beauty-today-vitamins__title,
+.beauty-routine-row__tag,
+.beauty-routine-row__count {
+  font-family: var(--font-body) !important;
+  font-size: var(--fs-12) !important;
+  font-weight: 600 !important;
+  line-height: 1.35 !important;
+  letter-spacing: var(--ls-wide) !important;
+  color: var(--text-muted) !important;
+  text-transform: uppercase;
+}
+
+/* Buttons */
+.btn-primary,
+.dashboard-btn-primary,
+.btn-secondary,
+.btn-ghost,
+.catalog-card__btn,
+.global-task-panel__submit,
+.global-task-panel__close,
+.wardrobe-outfits-link {
+  font-family: var(--font-body) !important;
+  font-size: var(--fs-14) !important;
+  font-weight: 500 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.02em !important;
+}
+
+/* Inputs / selects / textareas */
+.form-group input,
+.form-group textarea,
+.form-select,
+select.form-select,
+.catalog-select,
+.global-task-panel__input,
+.future-task-add__input,
+.progress-cat-add__input {
+  font-family: var(--font-body) !important;
+  font-size: var(--fs-16) !important;
+  line-height: 1.4 !important;
+  color: var(--text-primary) !important;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder,
+.global-task-panel__input::placeholder,
+.future-task-add__input::placeholder,
+.progress-diary-textarea::placeholder,
+.today-journal-textarea::placeholder,
+.journal-book__textarea::placeholder {
+  color: var(--text-light) !important;
+}
+
+/* Navigation */
+.side-nav__link,
+.side-nav__label {
+  font-family: var(--font-body) !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  line-height: 1.35 !important;
+  letter-spacing: 0.01em !important;
+}
+
+.side-nav__link {
+  color: var(--text-secondary) !important;
+}
+
+.side-nav__link:hover {
+  color: var(--text-primary) !important;
+}
+
+.side-nav__link--active {
+  color: var(--accent) !important;
+}
+
+/* Card-specific fixes */
+.home-focus-card .home-focus-stat,
+.home-sidebar .home-focus-card .home-focus-stat,
+.home-water-widget .water-widget-ml,
+.home-sidebar .home-water-widget .water-widget-ml,
+.home-outfit-hero__name,
+.page-today__evening-title {
+  color: var(--text-primary) !important;
+}
+
+/* Reduce overly pale text */
+.page-today__mood-hint,
+.diary-row__empty-hint,
+.catalog-empty,
+.future-tasks-toggle,
+.product-rating__clear,
+.global-task-item__delete,
+.today-panel-drag-handle {
+  color: var(--text-muted) !important;
+}
+
+/* Replace too-small 10px/11px patterns with readable minimums */
+.progress-diary-entry__note,
+.future-task-item__text,
+.future-task-add__input,
+.progress-diary-textarea,
+.progress-diary-filter-btn,
+.progress-cat-pill,
+.progress-cat-add__btn,
+.progress-cat-pill__remove,
+.future-task-item__delete,
+.future-task-item__date,
+.future-tasks-toggle,
+.progress-diary-edit-btn,
+.progress-diary-empty,
+.progress-diary-entry__date,
+.progress-note-pill,
+.progress-section-label,
+.home-vitamin-micro__label,
+.home-vitamin-micro__month,
+.home-vitamin-micro__link,
+.water-widget-month__hint,
+.water-widget-month__loading,
+.product-card-rating-row__label,
+.product-card-price {
+  font-size: var(--fs-12) !important;
+  line-height: 1.4 !important;
+}
+
+/* Normalize 13px to 14px where needed */
+.form-group label,
+.beauty-today-streak__line--muted,
+.beauty-today-streak__next,
+.beauty-today-slot-done__title,
+.beauty-today-routine-name,
+.beauty-today-vitamins__empty,
+.home-care-steps-left,
+.home-care-month-split__range,
+.catalog-card__meta,
+.product-rating__label,
+.product-price-input__currency,
+.wishlist-page__subtitle,
+.wishlist-page__banner,
+.wishlist-card__notes {
+  font-size: var(--fs-14) !important;
+  line-height: 1.45 !important;
+}
+
+/* Mobile safety */
+@media (max-width: 600px) {
+  body {
+    font-size: var(--fs-16) !important;
+  }
+
+  h1,
+  .ds-page-title,
+  .page-today__title,
+  .beauty-header__title,
+  .diary-page .ds-page-title,
+  .wardrobe-title,
+  .catalog-header__title {
+    font-size: 28px !important;
+  }
+
+  h2 {
+    font-size: 22px !important;
+  }
+
+  h3,
+  h4,
+  .dashboard-card-title {
+    font-size: var(--fs-18) !important;
+  }
+
+  p,
+  .today-journal-textarea,
+  .journal-book__textarea {
+    font-size: var(--fs-16) !important;
+  }
 }

@@ -14,6 +14,7 @@ import { Diary } from './pages/Diary'
 import { Outlet } from 'react-router-dom'
 import { Settings } from './pages/Settings'
 import { Wishlist } from './pages/Wishlist'
+import { Tasks } from './pages/Tasks'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -29,9 +30,14 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
+const routerFuture = {
+  v7_startTransition: true,
+  v7_relativeSplatPath: true,
+} as const
+
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter future={routerFuture}>
       <Routes>
         <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
         <Route
@@ -44,6 +50,7 @@ export default function App() {
         >
           <Route index element={<Home />} />
           <Route path="today" element={<Today />} />
+          <Route path="tasks" element={<Tasks />} />
           <Route path="beauty" element={<Beauty />} />
           <Route path="wishlist" element={<Wishlist />} />
           <Route path="wardrobe" element={<Outlet />}>

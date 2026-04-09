@@ -100,8 +100,8 @@ export function getSupabaseEnv(): {
   const rawUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined
   const rawKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
 
-  const rawUrlStripped = rawUrl != null && typeof rawUrl === 'string' ? stripQuotes(rawUrl) : ''
-  const rawKeyStripped = rawKey != null && typeof rawKey === 'string' ? stripQuotes(rawKey) : ''
+  const rawUrlStripped = rawUrl != null && typeof rawUrl === 'string' ? stripQuotes(rawUrl).trim() : ''
+  const rawKeyStripped = rawKey != null && typeof rawKey === 'string' ? stripQuotes(rawKey).trim() : ''
 
   if (rawUrlStripped && rawStringLooksLikeApiKey(rawUrlStripped)) {
     return { url: '', anonKey: rawKeyStripped, ok: false, issue: 'vars_swapped' }
@@ -110,7 +110,9 @@ export function getSupabaseEnv(): {
     return { url: '', anonKey: rawKeyStripped, ok: false, issue: 'vars_swapped' }
   }
 
-  const { url: normalizedUrl, error: normErr } = normalizeSupabaseApiUrl(rawUrl)
+  const { url: normalizedUrl, error: normErr } = normalizeSupabaseApiUrl(
+    rawUrlStripped || undefined
+  )
   const anonKey = rawKeyStripped
 
   if (normErr === 'postgres_string') {

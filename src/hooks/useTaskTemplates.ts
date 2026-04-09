@@ -1,6 +1,37 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import {
+  clearTemplatesMissingFromStorage,
+  isMissingTableError,
+  persistTemplatesMissingToStorage,
+  readTemplatesMissingFromStorage,
+} from '../lib/supabaseErrors'
 import type { DailyTask, TaskTemplate } from '../lib/supabase'
+
+const taskTemplatesDisabled =
+  typeof import.meta !== 'undefined' && import.meta.env.VITE_TASK_TEMPLATES_DISABLED === 'true'
+
+/** One in-flight GET per user — avoids duplicate 404s (React Strict Mode, multiple hook instances). */
+const taskTemplatesInflight = new Map<string, Promise<{ data: unknown; error: unknown }>>()
+
+function queryTaskTemplatesOnce(userId: string): Promise<{ data: unknown; error: unknown }> {
+  const existing = taskTemplatesInflight.get(userId)
+  if (existing) return existing
+
+  const promise = Promise.resolve(
+    supabase
+      .from('task_templates')
+      .select('*')
+      .eq('user_id', userId)
+      .order('sort_order', { ascending: true })
+  ).then((r) => r as { data: unknown; error: unknown })
+
+  taskTemplatesInflight.set(userId, promise)
+  promise.finally(() => {
+    taskTemplatesInflight.delete(userId)
+  })
+  return promise
+}
 
 // Check if a template applies to a given date
 export function templateMatchesDate(template: TaskTemplate, date: Date): boolean {
@@ -25,20 +56,66 @@ export function templateMatchesDate(template: TaskTemplate, date: Date): boolean
 export function useTaskTemplates(userId: string | undefined) {
   const [templates, setTemplates] = useState<TaskTemplate[]>([])
   const [loading, setLoading] = useState(false)
+  /** Missing table, env disable, or sessionStorage from a prior 404 — UI hint; skip logic uses storage + `readTemplatesMissingFromStorage(userId)`. */
+  const [templatesTableMissing, setTemplatesTableMissing] = useState(false)
 
-  const fetchTemplates = useCallback(async () => {
-    if (!userId) return
-    setLoading(true)
-    const { data } = await supabase
-      .from('task_templates')
-      .select('*')
-      .eq('user_id', userId)
-      .order('sort_order', { ascending: true })
-    setTemplates((data as TaskTemplate[]) ?? [])
-    setLoading(false)
+  const fetchTemplates = useCallback(
+    async (opts?: { force?: boolean }) => {
+      if (taskTemplatesDisabled) {
+        setTemplatesTableMissing(true)
+        setTemplates([])
+        return
+      }
+      if (!userId) return
+
+      if (opts?.force) {
+        clearTemplatesMissingFromStorage(userId)
+        setTemplatesTableMissing(false)
+      } else if (readTemplatesMissingFromStorage(userId)) {
+        setTemplatesTableMissing(true)
+        return
+      }
+
+      setLoading(true)
+      try {
+        const { data, error } = await queryTaskTemplatesOnce(userId)
+        if (error) {
+          if (isMissingTableError(error)) {
+            persistTemplatesMissingToStorage(userId)
+            setTemplatesTableMissing(true)
+            setTemplates([])
+          } else {
+            console.error('useTaskTemplates fetch:', error)
+            setTemplates([])
+          }
+          return
+        }
+        setTemplates((data as TaskTemplate[]) ?? [])
+        clearTemplatesMissingFromStorage(userId)
+        setTemplatesTableMissing(false)
+      } finally {
+        setLoading(false)
+      }
+    },
+    [userId]
+  )
+
+  useEffect(() => {
+    setTemplates([])
+    if (!userId) {
+      setTemplatesTableMissing(false)
+      return
+    }
+    if (taskTemplatesDisabled) {
+      setTemplatesTableMissing(true)
+      return
+    }
+    setTemplatesTableMissing(readTemplatesMissingFromStorage(userId))
   }, [userId])
 
-  useEffect(() => { fetchTemplates() }, [fetchTemplates])
+  useEffect(() => {
+    void fetchTemplates()
+  }, [fetchTemplates])
 
   const addTemplate = useCallback(
     async (
@@ -47,7 +124,7 @@ export function useTaskTemplates(userId: string | undefined) {
       days: number[] | null,
       category?: string | null
     ) => {
-      if (!userId) return
+      if (!userId || templatesTableMissing) return
       await supabase.from('task_templates').insert({
         user_id: userId,
         title,
@@ -58,29 +135,31 @@ export function useTaskTemplates(userId: string | undefined) {
       })
       await fetchTemplates()
     },
-    [userId, fetchTemplates]
+    [userId, fetchTemplates, templatesTableMissing]
   )
 
   const deleteTemplate = useCallback(
     async (id: string) => {
+      if (templatesTableMissing) return
       await supabase.from('task_templates').delete().eq('id', id)
       setTemplates((prev) => prev.filter((t) => t.id !== id))
     },
-    []
+    [templatesTableMissing]
   )
 
   const toggleTemplate = useCallback(
     async (id: string, is_active: boolean) => {
+      if (templatesTableMissing) return
       await supabase.from('task_templates').update({ is_active, updated_at: new Date().toISOString() }).eq('id', id)
       setTemplates((prev) => prev.map((t) => (t.id === id ? { ...t, is_active } : t)))
     },
-    []
+    [templatesTableMissing]
   )
 
   // Apply matching templates to a daily entry (create tasks that don't exist yet)
   const applyTemplatesToEntry = useCallback(
     async (entryId: string, date: Date) => {
-      if (!userId || templates.length === 0) return
+      if (!userId || templatesTableMissing || templates.length === 0) return
 
       const matching = templates.filter((t) => templateMatchesDate(t, date))
       if (matching.length === 0) return
@@ -108,7 +187,7 @@ export function useTaskTemplates(userId: string | undefined) {
         }))
       )
     },
-    [userId, templates]
+    [userId, templates, templatesTableMissing]
   )
 
   // Carry over uncompleted tasks from the previous day into the given entry
@@ -198,5 +277,15 @@ export function useTaskTemplates(userId: string | undefined) {
     [userId, templates]
   )
 
-  return { templates, loading, addTemplate, deleteTemplate, toggleTemplate, applyTemplatesToEntry, carryOverFromPreviousDay, fetchTemplates }
+  return {
+    templates,
+    loading,
+    templatesTableMissing,
+    addTemplate,
+    deleteTemplate,
+    toggleTemplate,
+    applyTemplatesToEntry,
+    carryOverFromPreviousDay,
+    fetchTemplates,
+  }
 }

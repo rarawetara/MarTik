@@ -11,6 +11,10 @@ export const ru = {
   envMissingVars:
     'Нужны: VITE_SUPABASE_URL (полная ссылка вида https://xxxx.supabase.co) и VITE_SUPABASE_ANON_KEY (ключ anon). Supabase → Project Settings → API.',
   envMissingLocal: 'Локально создайте файл .env в корне проекта (см. .env.example).',
+  envMissingAnonKey:
+    'Не задан VITE_SUPABASE_ANON_KEY (anon / publishable ключ из Supabase → Project Settings → API). Без него API отвечает: «No API key found in request».',
+  envMissingUrl:
+    'Некорректный VITE_SUPABASE_URL: нужна ссылка вида https://xxxx.supabase.co из того же раздела API.',
   envWrongPostgresUrl:
     'Похоже, в VITE_SUPABASE_URL попала строка подключения к базе (postgresql://… или порт :5432). В браузере нужна другая ссылка: Supabase → Project Settings → API → скопируйте Project URL — вид https://xxxx.supabase.co (без db. и без :5432).',
   envVarsSwapped:
@@ -34,6 +38,15 @@ export const ru = {
   errorUserExists: 'Этот email уже зарегистрирован.',
   errorRateLimit: 'Слишком много попыток. Попробуйте позже.',
   errorInvalidLogin: 'Неверный email или пароль.',
+  errorEmailProviderDisabled:
+    'Вход по email отключён в проекте. Supabase → Authentication → Providers → включите Email.',
+  errorSignupDisabled: 'Регистрация отключена в настройках проекта (Authentication → Providers).',
+  errorCaptchaFailed: 'Проверка captcha не прошла. Обновите страницу и попробуйте снова.',
+  errorWeakPassword: 'Пароль слишком слабый. Увеличьте длину или добавьте буквы и цифры.',
+  errorEmailInvalid: 'Некорректный адрес email.',
+  errorEmailNotAuthorized: 'Этот email не разрешён для входа (ограничения в проекте).',
+  authError400:
+    'Запрос отклонён (400). Проверьте email и пароль, подтверждение почты и настройки входа в Supabase.',
   signOut: 'Выйти',
   passwordsMismatch: 'Пароли не совпадают.',
   loginPrompt: 'Войдите в аккаунт',
@@ -42,6 +55,7 @@ export const ru = {
   // Nav
   navHome: 'Главная',
   navToday: 'Сегодня',
+  navTasks: 'Задачи',
   navDiary: 'Дневник',
   navSettings: 'Настройки',
   navBeauty: 'Красота',
@@ -353,6 +367,10 @@ export const ru = {
   mood: 'Настроение',
   moodPlaceholder: 'Как ты сейчас?',
   tasks: 'Задачи',
+  tasksPageLede: 'Список задач на выбранный день — те же данные, что в блоке «Задачи» на странице «Сегодня».',
+  tasksPageBackToToday: 'Открыть день целиком (Сегодня)',
+  taskTemplatesMigrationHint:
+    'Повторяющиеся задачи недоступны: в Supabase выполните SQL из supabase-migration-task-templates.sql. После создания таблицы откройте приложение в новой вкладке или закройте старую — чтобы снова запросить шаблоны. Либо задайте VITE_TASK_TEMPLATES_DISABLED=true, пока миграции нет.',
   addTask: 'Добавить',
   tasksHideCompletedTitle: 'Скрыть выполненные',
   tasksShowCompletedTitle: 'Показать выполненные',

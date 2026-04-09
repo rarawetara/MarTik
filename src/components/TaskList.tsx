@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Trash2, RepeatIcon, Pencil, Tag, Eye, EyeOff } from 'lucide-react'
 import { ru } from '../constants/ru'
 import { supabase } from '../lib/supabase'
+import { capitalizeFirst, textInputLocaleProps } from '../lib/textInput'
 import type { DailyTask, TaskCategory, TaskTemplate } from '../lib/supabase'
 
 const DOW_LABELS = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']
@@ -71,7 +72,7 @@ export function TaskList({
   useEffect(() => { if (addingCat) catInputRef.current?.focus() }, [addingCat])
 
   const handleAddCat = async () => {
-    const name = newCatValue.trim()
+    const name = capitalizeFirst(newCatValue.trim())
     setAddingCat(false); setNewCatValue('')
     if (!name) return
     await onAddCategory?.(name)
@@ -97,7 +98,7 @@ export function TaskList({
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault()
-    const title = newTitle.trim()
+    const title = capitalizeFirst(newTitle.trim())
     if (!title || adding) return
     setAdding(true)
     try {
@@ -127,7 +128,7 @@ export function TaskList({
 
   const saveEdit = async () => {
     if (!editingId) return
-    const title = editingTitle.trim()
+    const title = capitalizeFirst(editingTitle.trim())
     if (!title) { setEditingId(null); return }
 
     const patch: Partial<DailyTask> = {}
@@ -183,7 +184,7 @@ export function TaskList({
 
   const handleAddTemplate = async (e: React.FormEvent) => {
     e.preventDefault()
-    const title = tplTitle.trim()
+    const title = capitalizeFirst(tplTitle.trim())
     if (!title || addingTpl || !onAddTemplate) return
     setAddingTpl(true)
     try {
@@ -228,6 +229,7 @@ export function TaskList({
               className="task-item__edit-input"
               placeholder="Название задачи"
               disabled={disabled}
+              {...textInputLocaleProps}
             />
             <select
               className="task-item__edit-cat"
@@ -345,12 +347,17 @@ export function TaskList({
         ))}
         {onAddCategory && (
           addingCat ? (
-            <input ref={catInputRef} type="text" value={newCatValue}
+            <input
+              ref={catInputRef}
+              type="text"
+              value={newCatValue}
               onChange={(e) => setNewCatValue(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') handleAddCat(); if (e.key === 'Escape') { setAddingCat(false); setNewCatValue('') } }}
               onBlur={handleAddCat}
               placeholder="Новая категория"
-              className="tl-cat-input" />
+              className="tl-cat-input"
+              {...textInputLocaleProps}
+            />
           ) : (
             <button type="button" className="tl-cat-add-btn" onClick={() => setAddingCat(true)} aria-label="Добавить категорию">+</button>
           )
@@ -360,8 +367,25 @@ export function TaskList({
       {/* Add task form */}
       <form onSubmit={handleAdd} className="tl-add-form">
         <div className="tl-add-form__row">
-          <input type="text" value={newTitle} onChange={(e) => setNewTitle(e.target.value)}
-            placeholder={ru.taskPlaceholder} disabled={disabled} className="task-list-add__input" />
+          <input
+            type="text"
+            value={newTitle}
+            onChange={(e) => {
+              let v = e.target.value
+              if (newTitle.length === 0 && v.length > 0) {
+                const first = v.trimStart()[0]
+                if (first && /[a-zа-яё]/i.test(first)) {
+                  const i = v.indexOf(first)
+                  v = v.slice(0, i) + first.toLocaleUpperCase('ru-RU') + v.slice(i + 1)
+                }
+              }
+              setNewTitle(v)
+            }}
+            placeholder={ru.taskPlaceholder}
+            disabled={disabled}
+            className="task-list-add__input"
+            {...textInputLocaleProps}
+          />
           {catNames.length > 0 && (
             <select className="tl-add-cat-select" value={newCatName}
               onChange={(e) => setNewCatName(e.target.value)} disabled={disabled}>
@@ -434,8 +458,25 @@ export function TaskList({
             </button>
           ) : (
             <form onSubmit={handleAddTemplate} className="task-template-form">
-              <input type="text" value={tplTitle} onChange={(e) => setTplTitle(e.target.value)}
-                placeholder="Название задачи" className="task-list-add__input" required />
+              <input
+                type="text"
+                value={tplTitle}
+                onChange={(e) => {
+                  let v = e.target.value
+                  if (tplTitle.length === 0 && v.length > 0) {
+                    const first = v.trimStart()[0]
+                    if (first && /[a-zа-яё]/i.test(first)) {
+                      const i = v.indexOf(first)
+                      v = v.slice(0, i) + first.toLocaleUpperCase('ru-RU') + v.slice(i + 1)
+                    }
+                  }
+                  setTplTitle(v)
+                }}
+                placeholder="Название задачи"
+                className="task-list-add__input"
+                required
+                {...textInputLocaleProps}
+              />
               <select className="catalog-select" value={tplType}
                 onChange={(e) => setTplType(e.target.value as TaskTemplate['recurrence_type'])}>
                 {RECURRENCE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}

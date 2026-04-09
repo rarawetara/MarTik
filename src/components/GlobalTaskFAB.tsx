@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useGetOrCreateToday } from '../hooks/useGetOrCreateToday'
 import { useTaskTemplates } from '../hooks/useTaskTemplates'
 import { supabase } from '../lib/supabase'
+import { capitalizeFirst, textInputLocaleProps } from '../lib/textInput'
 import type { DailyTask } from '../lib/supabase'
 
 export function GlobalTaskFAB() {
@@ -96,7 +97,7 @@ export function GlobalTaskFAB() {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault()
-    const title = newTitle.trim()
+    const title = capitalizeFirst(newTitle.trim())
     if (!title || adding || !user?.id) return
 
     setAddError(null)
@@ -239,10 +240,22 @@ export function GlobalTaskFAB() {
               ref={inputRef}
               type="text"
               value={newTitle}
-              onChange={(e) => { setNewTitle(e.target.value); setAddError(null) }}
+              onChange={(e) => {
+                let v = e.target.value
+                if (newTitle.length === 0 && v.length > 0) {
+                  const first = v.trimStart()[0]
+                  if (first && /[a-zа-яё]/i.test(first)) {
+                    const i = v.indexOf(first)
+                    v = v.slice(0, i) + first.toLocaleUpperCase('ru-RU') + v.slice(i + 1)
+                  }
+                }
+                setNewTitle(v)
+                setAddError(null)
+              }}
               placeholder="Добавить задачу…"
               className="global-task-panel__input"
               disabled={adding || !entryReady}
+              {...textInputLocaleProps}
             />
             <button
               type="submit"
